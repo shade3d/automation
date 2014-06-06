@@ -195,6 +195,7 @@ fi
 if [ x"$MYSQL_CONFIG" = x ]; then
 	echo "not found"
 	echo "MySQL was not found on this system!"
+	exit 1
 fi
 MYSQL_PATH=`dirname "$MYSQL_CONFIG"`
 MYSQL_PATH=`dirname "$MYSQL_PATH"`
