@@ -1,5 +1,5 @@
 #!/bin/sh
-SCRIPT_VERSION="1.55"
+SCRIPT_VERSION="1.56"
 
 if [ x"${APACHE_PREFIX}" = x ]; then
 	APACHE_PREFIX="/usr/local/httpd"
@@ -43,7 +43,7 @@ done
 
 if [ x"$GETPHP_FORCE_UPDATE" = x1 ]; then
 	echo "Updating get_php.sh, please wait..."
-	curl -s "http://ookoo.org/svn/snip/automation/get_php.sh" >get_php.sh~
+	curl -s "http://gitlab.xta.net/internal/automation/raw/master/get_php.sh" >get_php.sh~
 	if [ "$?" != "0" ]; then
 		echo "An error occured while downloading the new get_php.sh. Aborting update..."
 		exit
@@ -53,11 +53,11 @@ if [ x"$GETPHP_FORCE_UPDATE" = x1 ]; then
 fi
 # Do we have last version of get_php.sh?
 echo -n "Checking for last version of get_php.sh..."
-LAST_VERSION=`curl -s "http://ookoo.org/svn/snip/automation/versions.txt" | grep "^get_php.sh" | awk '{ print $2 }'`
+LAST_VERSION=`curl -s "http://gitlab.xta.net/internal/automation/raw/master/versions.txt" | grep "^get_php.sh" | awk '{ print $2 }'`
 if [ x"$LAST_VERSION" != x"$SCRIPT_VERSION" ]; then
 	echo "new version available"
 	echo "Updating get_php.sh, please wait..."
-	curl -s "http://ookoo.org/svn/snip/automation/get_php.sh" >get_php.sh~
+	curl -s "http://gitlab.xta.net/internal/automation/raw/master/get_php.sh" >get_php.sh~
 	if [ "$?" != "0" ]; then
 		echo "An error occured while downloading the new get_php.sh. Aborting update..."
 	else
@@ -71,7 +71,7 @@ fi
 echo "Using Apache in ${APACHE_PREFIX}"
 
 PHP_BRANCH="5"
-PHP_PECL="imagick uuid APC memcached/stable svn mailparse mongo http://ookoo.org/svn/btclib git://github.com/MagicalTux/php-git.git stomp yaml proctitle"
+PHP_PECL="imagick uuid APC memcached/stable svn mailparse mongo git://github.com/MagicalTux/btclib.git git://github.com/MagicalTux/php-git.git stomp yaml proctitle"
 # PECL DEPENCIES
 # imagick : libmagick6-dev
 
@@ -153,7 +153,7 @@ fi
 # download mail patch
 #if [ ! -f "$PHP_MAIL_PATCH_FILE" ]; then
 #	echo -n "Downloading $PHP_MAIL_PATCH_FILE ..."
-#	wget -q -O "$PHP_MAIL_PATCH_FILE" "http://ookoo.org/svn/snip/automation/$PHP_MAIL_PATCH_FILE"
+#	wget -q -O "$PHP_MAIL_PATCH_FILE" "http://gitlab.xta.net/internal/automation/raw/master/$PHP_MAIL_PATCH_FILE"
 #	if [ $? != "0" ]; then
 #		echo "Could not download $PHP_MAIL_PATCH_FILE"
 #		exit 1
@@ -162,18 +162,6 @@ fi
 #fi
 
 # download php 5.3.2 fix
-if [ x"$PHP_VERSION" = x"5.3.2" ]; then
-	PHP_FIX_PATCH="php-5.3.2-mysql-badmem-fix.patch"
-	if [ ! -f "$PHP_FIX_PATCH" ]; then
-		echo -n "Downloading $PHP_FIX_PATCH ..."
-		wget -q -O "$PHP_FIX_PATCH" "http://ookoo.org/svn/snip/$PHP_FIX_PATCH"
-		if [ $? != "0" ]; then
-			echo "Could not download $PHP_FIX_PATCH"
-			exit 1
-		fi
-		echo "done"
-	fi
-fi
 IS_CLEAN=no
 if [ ! -d "$PHP_DIR" ]; then
 	echo -n "Extracting PHP... "
@@ -237,9 +225,9 @@ echo -n "Configure... ";
 --with-zlib --enable-gd-native-ttf --with-jpeg-dir="$DEFAULT_PATH" --with-png-dir="$DEFAULT_PATH" \
 --with-zlib-dir="$DEFAULT_PATH" --with-freetype-dir="$DEFAULT_PATH" --with-openssl="$DEFAULT_PATH" \
 --with-curl="$DEFAULT_PATH" --with-zlib-dir="$DEFAULT_PATH" --enable-intl --with-icu-dir="$DEFAULT_PATH" \
---with-xmlrpc --with-xsl --disable-posix --with-tidy --with-iconv-dir --enable-sockets \
+--with-xmlrpc --with-xsl --with-tidy --with-iconv-dir --enable-sockets \
 --enable-soap --enable-mbstring --with-imap --with-imap-ssl --with-bz2 \
---with-pdo-mysql="$MYSQL_PATH" \
+--with-pdo-mysql="$MYSQL_PATH" --enable-pcntl --enable-bcmath \
 --with-mhash --with-mcrypt --with-gmp="$DEFAULT_PATH" --with-gettext --with-ldap \
 --with-config-file-path="${PHP_PREFIX}/lib/php-web" --disable-cgi --enable-zip $EXTRA_FLAGS
 
@@ -272,28 +260,6 @@ echo "extension_dir = ${PHP_PREFIX}/lib/php_mod" >>"${PHP_PREFIX}/lib/php-web/ph
 mkdir -p mod
 cd mod
 for foo in $PHP_PECL; do
-	if [ `echo "$foo" | grep -cF "http://ookoo.org/svn"` = "1" ]; then
-		# get name
-		NAME=`echo "$foo" | sed -e 's#http://ookoo.org/svn/##;s#/$##;s#/trunk##'`
-		echo -n "$NAME"
-		if [ -d "$NAME" ]; then
-			cd "$NAME"
-			svn up -q
-		else
-			svn co -q "$foo" "$NAME"
-			cd "$NAME"
-		fi
-		echo -n "[svn] "
-		"${PHP_PREFIX}/bin/phpize" >phpize.log 2>&1
-		if [ $? != 0 ]; then
-			continue;
-		fi
-		./configure >configure.log 2>&1
-		make -j"$MAKE_PROCESSES" >make.log 2>&1
-		cp modules/* "${PHP_PREFIX}/lib/php_mod"
-		cd ..
-		continue
-	fi
 	if [ `echo "$foo" | grep -c '^git://'` = "1" ]; then
 		# git repo
 		NAME=`echo "$foo" | sed -e 's#.*/##;s/\.git$//'`
