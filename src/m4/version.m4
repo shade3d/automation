@@ -23,7 +23,7 @@ done
 
 if [ x"$SCRIPT_FORCE_UPDATE" = x1 ]; then
 	echo "Updating M4_TARGET, please wait..."
-	curl -s "http://gitlab.xta.net/internal/automation/raw/master/M4_TARGET" >M4_TARGET~
+	curl -s "https://raw.githubusercontent.com/Tibanne/automation/master/M4_TARGET" >M4_TARGET~
 	if [ "$?" != "0" ]; then
 		echo "An error occured while downloading the new M4_TARGET. Aborting update..."
 		exit
@@ -33,11 +33,11 @@ if [ x"$SCRIPT_FORCE_UPDATE" = x1 ]; then
 fi
 # Do we have last version?
 echo -n "Checking for last version of M4_TARGET..."
-LAST_VERSION=`curl -s "http://gitlab.xta.net/internal/automation/raw/master/versions.txt" | grep "^M4_TARGET" | awk '{ print $2 }'`
+LAST_VERSION=`curl -s "https://raw.githubusercontent.com/Tibanne/automation/master/versions.txt" | grep "^M4_TARGET" | awk '{ print $2 }'`
 if [ x"$LAST_VERSION" != x"$SCRIPT_VERSION" ]; then
 	echo "new version available"
 	echo "Updating M4_TARGET, please wait..."
-	curl -s "http://gitlab.xta.net/internal/automation/raw/master/M4_TARGET" >M4_TARGET~
+	curl -s "https://raw.githubusercontent.com/Tibanne/automation/master/M4_TARGET" >M4_TARGET~
 	if [ "$?" != "0" ]; then
 		echo "An error occured while downloading the new M4_TARGET. Aborting update..."
 	else

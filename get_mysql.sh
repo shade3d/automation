@@ -2,11 +2,11 @@
 SCRIPT_VERSION="1.1"
 # Do we have last version of get_mysql.sh?
 echo -n "Checking for last version of get_mysql.sh..."
-LAST_VERSION=`curl -s "http://gitlab.xta.net/internal/automation/raw/master/versions.txt" | grep "^get_mysql.sh" | awk '{ print $2 }'`
+LAST_VERSION=`curl -s "https://raw.githubusercontent.com/Tibanne/automation/master/versions.txt" | grep "^get_mysql.sh" | awk '{ print $2 }'`
 if [ x"$LAST_VERSION" != x"$SCRIPT_VERSION" ]; then
 	echo "new version available"
 	echo "Updating get_mysql.sh, please wait..."
-	curl -s "http://gitlab.xta.net/internal/automation/raw/master/get_mysql.sh" >get_mysql.sh~
+	curl -s "https://raw.githubusercontent.com/Tibanne/automation/master/get_mysql.sh" >get_mysql.sh~
 	if [ "$?" != "0" ]; then
 		echo "An error occured while downloading the new get_mysql.sh. Aborting update..."
 	else
