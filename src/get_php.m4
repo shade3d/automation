@@ -22,7 +22,7 @@ fi
 echo "$PHP_CUR_VERSION"
 
 echo -n "Checking for last version of PHP $PHP_BRANCH: "
-PHP_VERSION=`curl -s http://php.net/downloads.php | grep "PHP $PHP_BRANCH\." | head -n 1 | $SED -r -e 's/^.*PHP +//;s/<.*>//;s/ +//g;s/\(.*\)//'`
+PHP_VERSION=`curl -s http://php.net/downloads.php | grep "PHP $PHP_BRANCH\." | grep -v headsup | head -n 1 | $SED -r -e 's/^.*PHP +//;s/<.*>//;s/ +//g;s/\(.*\)//'`
 echo "$PHP_VERSION"
 
 if [ x"$PHP_CUR_VERSION" = x"$PHP_VERSION" ]; then
