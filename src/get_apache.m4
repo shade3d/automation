@@ -1,91 +1,10 @@
-#!/bin/sh
-
-# check for correct interpreter
-if [ `echo -n | grep -c -- -n` -gt 0 ]; then
-	if [ `bash -c 'echo -n | grep -c -- -n'` -gt 0 ]; then
-		echo "Can't do anything for you with this bash! :("
-		exit 1
-	fi
-	exec bash "$0" "$@"
-fi
-OPTS="$@"
-SCRIPT_VERSION="1.15"
-
-SCRIPT_FORCE_REINSTALL=0
-SCRIPT_FORCE_UPDATE=0
-
-while [ x"$1" != x ]; do
-	OPT=$1
-	shift
-	case "$OPT" in
-		-f)
-			SCRIPT_FORCE_REINSTALL=1
-			;;
-		-u)
-			SCRIPT_FORCE_UPDATE=1
-			;;
-		-h)
-			echo "Usage: $0 [-f] [-u]"
-			exit
-			;;
-	esac
-done
-
-if [ x"$SCRIPT_FORCE_UPDATE" = x1 ]; then
-	echo "Updating get_apache.sh, please wait..."
-	curl -s "http://gitlab.xta.net/internal/automation/raw/master/get_apache.sh" >get_apache.sh~
-	if [ "$?" != "0" ]; then
-		echo "An error occured while downloading the new get_apache.sh. Aborting update..."
-		exit
-	fi
-	mv -f get_apache.sh~ get_apache.sh; chmod 0755 get_apache.sh
-	exit
-fi
-# Do we have last version?
-echo -n "Checking for last version of get_apache.sh..."
-LAST_VERSION=`curl -s "http://gitlab.xta.net/internal/automation/raw/master/versions.txt" | grep "^get_apache.sh" | awk '{ print $2 }'`
-if [ x"$LAST_VERSION" != x"$SCRIPT_VERSION" ]; then
-	echo "new version available"
-	echo "Updating get_apache.sh, please wait..."
-	curl -s "http://gitlab.xta.net/internal/automation/raw/master/get_apache.sh" >get_apache.sh~
-	if [ "$?" != "0" ]; then
-		echo "An error occured while downloading the new get_apache.sh. Aborting update..."
-	else
-		# We'll do everything in only one line, seems that sh has problems with updates in other cases...
-		mv -f get_apache.sh~ get_apache.sh; chmod 0755 get_apache.sh; exec ./get_apache.sh "$OPTS"; exit
-	fi
-else
-	echo
-fi
-
-if [ x"${APACHE_PREFIX}" = x ]; then
-	APACHE_PREFIX="/usr/local/httpd"
-fi
-
-echo "Using Apache in ${APACHE_PREFIX}"
-
-# Detect if we're on a debian machine
-
-case `uname` in
-	*BSD)
-		MD5=md5
-		SED=gsed
-		MAKE_PROCESSES=$[ `sysctl -n hw.ncpu` * 2 - 1 ]
-		DEFAULT_PATH=/usr
-		;;
-	Darwin)
-		MD5=md5
-		SED=gsed
-		MAKE_PROCESSES=$[ `sysctl -n hw.ncpu` * 2 - 1 ]
-		DEFAULT_PATH=/opt/local
-		;;
-	*)
-		MD5=md5sum
-		SED=sed
-		MAKE_PROCESSES=$[ `grep -c '^processor' /proc/cpuinfo` * 2 - 1 ]
-		DEFAULT_PATH=/usr
-		;;
-esac
+changequote([","])dnl
+define(["M4_TARGET"],["get_apache.sh"])dnl
+define(["M4_VERSION"],["1.15"])dnl
+include(bash.m4)dnl
+include(version.m4)dnl
+include(apache.m4)dnl
+include(os.m4)dnl
 
 APACHE_BRANCH="2.2"
 
@@ -159,19 +78,7 @@ if [ ! -d "$APACHE_DIRNAME" ]; then
 	echo "done"
 fi
 
-echo -n "Detecting MySQL..."
-
-MYSQL_CONFIG=`PATH=/usr/local/mysql/bin:$PATH which mysql_config 2>/dev/null`
-if [ x"$MYSQL_CONFIG" = x ]; then
-	MYSQL_CONFIG=`PATH=/usr/local/mysql/bin:/opt/local/bin:$PATH which mysql_config5 2>/dev/null`
-fi
-if [ x"$MYSQL_CONFIG" = x ]; then
-	echo "not found"
-	echo "MySQL was not found on this system!"
-fi
-MYSQL_PATH=`dirname "$MYSQL_CONFIG"`
-MYSQL_PATH=`dirname "$MYSQL_PATH"`
-echo "Found in $MYSQL_PATH"
+include(detect_mysql.m4)dnl
 
 cd "$APACHE_DIRNAME"
 echo -n "Configuring Apache2... "
