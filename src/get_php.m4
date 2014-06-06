@@ -1,92 +1,11 @@
-#!/bin/sh
-
-# check for correct interpreter
-if [ `echo -n | grep -c -- -n` -gt 0 ]; then
-	if [ `bash -c 'echo -n | grep -c -- -n'` -gt 0 ]; then
-		echo "Can't do anything for you with this bash! :("
-		exit 1
-	fi
-	exec bash "$0" "$@"
-fi
-OPTS="$@"
-SCRIPT_VERSION="1.56"
-
-SCRIPT_FORCE_REINSTALL=0
-SCRIPT_FORCE_UPDATE=0
-
-while [ x"$1" != x ]; do
-	OPT=$1
-	shift
-	case "$OPT" in
-		-f)
-			SCRIPT_FORCE_REINSTALL=1
-			;;
-		-u)
-			SCRIPT_FORCE_UPDATE=1
-			;;
-		-h)
-			echo "Usage: $0 [-f] [-u]"
-			exit
-			;;
-	esac
-done
-
-if [ x"$SCRIPT_FORCE_UPDATE" = x1 ]; then
-	echo "Updating get_php.sh, please wait..."
-	curl -s "http://gitlab.xta.net/internal/automation/raw/master/get_php.sh" >get_php.sh~
-	if [ "$?" != "0" ]; then
-		echo "An error occured while downloading the new get_php.sh. Aborting update..."
-		exit
-	fi
-	mv -f get_php.sh~ get_php.sh; chmod 0755 get_php.sh
-	exit
-fi
-# Do we have last version?
-echo -n "Checking for last version of get_php.sh..."
-LAST_VERSION=`curl -s "http://gitlab.xta.net/internal/automation/raw/master/versions.txt" | grep "^get_php.sh" | awk '{ print $2 }'`
-if [ x"$LAST_VERSION" != x"$SCRIPT_VERSION" ]; then
-	echo "new version available"
-	echo "Updating get_php.sh, please wait..."
-	curl -s "http://gitlab.xta.net/internal/automation/raw/master/get_php.sh" >get_php.sh~
-	if [ "$?" != "0" ]; then
-		echo "An error occured while downloading the new get_php.sh. Aborting update..."
-	else
-		# We'll do everything in only one line, seems that sh has problems with updates in other cases...
-		mv -f get_php.sh~ get_php.sh; chmod 0755 get_php.sh; exec ./get_php.sh "$OPTS"; exit
-	fi
-else
-	echo
-fi
-
-if [ x"${APACHE_PREFIX}" = x ]; then
-	APACHE_PREFIX="/usr/local/httpd"
-fi
-
-echo "Using Apache in ${APACHE_PREFIX}"
-
-if [ x"${PHP_PREFIX}" = x ]; then
-	PHP_PREFIX="/usr/local"
-fi
-
-# Detect if we're on a debian machine
-
-case `uname` in
-	*BSD)
-		SED=gsed
-		MAKE_PROCESSES=$[ `sysctl -n hw.ncpu` * 2 - 1 ]
-		DEFAULT_PATH=/usr
-		;;
-	Darwin)
-		SED=gsed
-		MAKE_PROCESSES=$[ `sysctl -n hw.ncpu` * 2 - 1 ]
-		DEFAULT_PATH=/opt/local
-		;;
-	*)
-		SED=sed
-		MAKE_PROCESSES=$[ `grep -c '^processor' /proc/cpuinfo` * 2 - 1 ]
-		DEFAULT_PATH=/usr
-		;;
-esac
+changequote([","])dnl
+define(["M4_TARGET"],["get_php.sh"])dnl
+define(["M4_VERSION"],["1.56"])dnl
+include(bash.m4)dnl
+include(version.m4)dnl
+include(apache.m4)dnl
+include(php.m4)dnl
+include(os.m4)dnl
 
 PHP_BRANCH="5"
 PHP_PECL="imagick uuid APC memcached/stable svn mailparse mongo git://github.com/MagicalTux/btclib.git git://github.com/MagicalTux/php-git.git stomp yaml proctitle"
@@ -183,19 +102,7 @@ if [ x"$IS_CLEAN" != x"yes" ]; then
 	echo
 fi
 
-echo -n "Detecting MySQL..."
-
-MYSQL_CONFIG=`PATH=/usr/local/mysql/bin:$PATH which mysql_config 2>/dev/null`
-if [ x"$MYSQL_CONFIG" = x ]; then
-	MYSQL_CONFIG=`PATH=/usr/local/mysql/bin:/opt/local/bin:$PATH which mysql_config5 2>/dev/null`
-fi
-if [ x"$MYSQL_CONFIG" = x ]; then
-	echo "not found"
-	echo "MySQL was not found on this system!"
-fi
-MYSQL_PATH=`dirname "$MYSQL_CONFIG"`
-MYSQL_PATH=`dirname "$MYSQL_PATH"`
-echo "Found in $MYSQL_PATH"
+include(detect_mysql.m4)dnl
 
 EXTRA_FLAGS=""
 

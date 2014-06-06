@@ -1,6 +1,6 @@
 #!/bin/sh
 # Debian install script for PHP/NC-compatible php
-MK_PHPNC_VERSION="1.4"
+SCRIPT_VERSION="1.4"
 
 echo "Checking packages..."
 apt-get -q=2 install gcc make libpng12-dev libcurl3-dev curl libares-dev libjpeg-dev \
