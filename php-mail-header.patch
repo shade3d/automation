@@ -1,0 +1,61 @@
+diff -Nura php-5.2.5/ext/standard/mail.c php-web-5.2.5/ext/standard/mail.c
+--- php-5.2.5/ext/standard/mail.c	2007-10-04 15:31:11.000000000 +0200
++++ php-web-5.2.5/ext/standard/mail.c	2008-04-07 09:48:03.000000000 +0200
+@@ -201,6 +201,43 @@
+ 	char *sendmail_path = INI_STR("sendmail_path");
+ 	char *sendmail_cmd = NULL;
+ 
++	/* Patched by Giam Teck Choon */
++	/* start add additional headers with self tweaking with reference to Steve Bennett's PHP mail() header patch at http://www.lancs.ac.uk/~steveb/php-mail-header-patch/ */
++	char *headers2=NULL;
++
++	// add a header in the form
++	//	X-PHP-Script: <server_name><php_self> for [<forwarded_for>,]<remote-addr>
++	while(1) {
++		zval **server, **remote_addr, **forwarded_for, **php_self, **server_name;
++
++		if (zend_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **) &server)==FAILURE)
++			break;
++		if (Z_TYPE_PP(server)!=IS_ARRAY)
++			break;
++		if (zend_hash_find(Z_ARRVAL_PP(server), "REMOTE_ADDR", sizeof("REMOTE_ADDR"), (void **) &remote_addr) == FAILURE)
++			break;
++		if (zend_hash_find(Z_ARRVAL_PP(server), "HTTP_X_FORWARDED_FOR", sizeof("HTTP_X_FORWARDED_FOR"), (void **) &forwarded_for) == FAILURE)
++			forwarded_for=NULL;
++		if (zend_hash_find(Z_ARRVAL_PP(server), "PHP_SELF", sizeof("PHP_SELF"), (void **) &php_self) == FAILURE)
++			break;
++		if (zend_hash_find(Z_ARRVAL_PP(server), "SERVER_NAME", sizeof("SERVER_NAME"), (void **) &server_name) == FAILURE)
++			break;
++		headers2 = emalloc(32+Z_STRLEN_PP(server_name)+Z_STRLEN_PP(php_self)
++			+(forwarded_for?Z_STRLEN_PP(forwarded_for)+2:0)
++			+Z_STRLEN_PP(remote_addr));
++		strcpy(headers2, "X-PHP-Script: ");
++		strcat(headers2, Z_STRVAL_PP(server_name));
++		strcat(headers2, Z_STRVAL_PP(php_self));
++		strcat(headers2, " for ");
++		if (forwarded_for) {
++			strcat(headers2, Z_STRVAL_PP(forwarded_for));
++			strcat(headers2, ", ");
++		}
++		strcat(headers2, Z_STRVAL_PP(remote_addr));
++		break;
++	}
++	/* end add additional headers with self tweaking with reference to Steve Bennett's PHP mail() header patch at http://www.lancs.ac.uk/~steveb/php-mail-header-patch/ */
++
+ 	if (!sendmail_path) {
+ #if (defined PHP_WIN32 || defined NETWARE)
+ 		/* handle old style win smtp sending */
+@@ -246,6 +283,13 @@
+ #endif
+ 		fprintf(sendmail, "To: %s\n", to);
+ 		fprintf(sendmail, "Subject: %s\n", subject);
++		/* Patched by Giam Teck Choon */
++		/* start add additional headers with self tweaking with reference to Steve Bennett's PHP mail() header patch at http://www.lancs.ac.uk/~steveb/php-mail-header-patch/ */
++		if (headers2 != NULL) {
++			fprintf(sendmail, "%s\n", headers2);
++			efree(headers2);
++		}
++		/* end add additional headers with self tweaking with reference to Steve Bennett's PHP mail() header patch at http://www.lancs.ac.uk/~steveb/php-mail-header-patch/ */
+ 		if (headers != NULL) {
+ 			fprintf(sendmail, "%s\n", headers);
+ 		}

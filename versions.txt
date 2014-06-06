@@ -1,0 +1,6 @@
+# Version file used by automation script to detect last available version of
+# each one
+mk_phpnc.sh 1.11
+get_apache.sh 1.15
+get_php.sh 1.55
+get_mysql.sh 1.1
