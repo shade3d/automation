@@ -1,6 +1,8 @@
 changequote([","])dnl
 define(["M4_TARGET"],["get_php.sh"])dnl
 define(["M4_VERSION"],["1.56"])dnl
+dnl rpm -i http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+define(["M4_YUM_PKG"],["make gcc gcc-g++ zlib-devel openssl-devel libxml2-devel bzip2-devel libcurl-devel libjpeg-devel libpng-devel freetype-devel gmp-devel libc-client-devel libicu-devel openldap-devel libmcrypt-devel libtidy-devel libxslt-devel"])dnl
 include(bash.m4)dnl
 include(version.m4)dnl
 include(apache.m4)dnl
@@ -102,8 +104,6 @@ if [ x"$IS_CLEAN" != x"yes" ]; then
 	echo
 fi
 
-include(detect_mysql.m4)dnl
-
 EXTRA_FLAGS=""
 
 # detect freetds and use
@@ -115,14 +115,14 @@ fi
 echo -n "Configure... ";
 ./configure >configure.log 2>&1 \
 --with-apxs2="${APACHE_PREFIX}/bin/apxs" --prefix="${PHP_PREFIX}" --enable-ftp --with-iconv \
---with-mysqli="$MYSQL_CONFIG" --with-mysql="$MYSQL_PATH" --enable-calendar --enable-fpm \
+--with-mysqli="mysqlnd" --with-mysql="mysqlnd" --enable-calendar --enable-fpm \
 --enable-exif --enable-wddx --enable-inline-optimization --with-gd \
 --with-zlib --enable-gd-native-ttf --with-jpeg-dir="$DEFAULT_PATH" --with-png-dir="$DEFAULT_PATH" \
---with-zlib-dir="$DEFAULT_PATH" --with-freetype-dir="$DEFAULT_PATH" --with-openssl="$DEFAULT_PATH" \
+--with-zlib-dir="$DEFAULT_PATH" --with-freetype-dir="$DEFAULT_PATH" --with-openssl \
 --with-curl="$DEFAULT_PATH" --with-zlib-dir="$DEFAULT_PATH" --enable-intl --with-icu-dir="$DEFAULT_PATH" \
 --with-xmlrpc --with-xsl --with-tidy --with-iconv-dir --enable-sockets \
 --enable-soap --enable-mbstring --with-imap --with-imap-ssl --with-bz2 \
---with-pdo-mysql="$MYSQL_PATH" --enable-pcntl --enable-bcmath \
+--with-pdo-mysql="mysqlnd" --enable-pcntl --enable-bcmath \
 --with-mhash --with-mcrypt --with-gmp="$DEFAULT_PATH" --with-gettext --with-ldap \
 --with-config-file-path="${PHP_PREFIX}/lib/php-web" --disable-cgi --enable-zip $EXTRA_FLAGS
 

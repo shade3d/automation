@@ -186,21 +186,6 @@ if [ x"$IS_CLEAN" != x"yes" ]; then
 	echo
 fi
 
-echo -n "Detecting MySQL..."
-
-MYSQL_CONFIG=`PATH=/usr/local/mysql/bin:$PATH which mysql_config 2>/dev/null`
-if [ x"$MYSQL_CONFIG" = x ]; then
-	MYSQL_CONFIG=`PATH=/usr/local/mysql/bin:/opt/local/bin:$PATH which mysql_config5 2>/dev/null`
-fi
-if [ x"$MYSQL_CONFIG" = x ]; then
-	echo "not found"
-	echo "MySQL was not found on this system!"
-	exit 1
-fi
-MYSQL_PATH=`dirname "$MYSQL_CONFIG"`
-MYSQL_PATH=`dirname "$MYSQL_PATH"`
-echo "Found in $MYSQL_PATH"
-
 EXTRA_FLAGS=""
 
 # detect freetds and use
@@ -212,14 +197,14 @@ fi
 echo -n "Configure... ";
 ./configure >configure.log 2>&1 \
 --with-apxs2="${APACHE_PREFIX}/bin/apxs" --prefix="${PHP_PREFIX}" --enable-ftp --with-iconv \
---with-mysqli="$MYSQL_CONFIG" --with-mysql="$MYSQL_PATH" --enable-calendar --enable-fpm \
+--with-mysqli="mysqlnd" --with-mysql="mysqlnd" --enable-calendar --enable-fpm \
 --enable-exif --enable-wddx --enable-inline-optimization --with-gd \
 --with-zlib --enable-gd-native-ttf --with-jpeg-dir="$DEFAULT_PATH" --with-png-dir="$DEFAULT_PATH" \
---with-zlib-dir="$DEFAULT_PATH" --with-freetype-dir="$DEFAULT_PATH" --with-openssl="$DEFAULT_PATH" \
+--with-zlib-dir="$DEFAULT_PATH" --with-freetype-dir="$DEFAULT_PATH" --with-openssl \
 --with-curl="$DEFAULT_PATH" --with-zlib-dir="$DEFAULT_PATH" --enable-intl --with-icu-dir="$DEFAULT_PATH" \
 --with-xmlrpc --with-xsl --with-tidy --with-iconv-dir --enable-sockets \
 --enable-soap --enable-mbstring --with-imap --with-imap-ssl --with-bz2 \
---with-pdo-mysql="$MYSQL_PATH" --enable-pcntl --enable-bcmath \
+--with-pdo-mysql="mysqlnd" --enable-pcntl --enable-bcmath \
 --with-mhash --with-mcrypt --with-gmp="$DEFAULT_PATH" --with-gettext --with-ldap \
 --with-config-file-path="${PHP_PREFIX}/lib/php-web" --disable-cgi --enable-zip $EXTRA_FLAGS
 
