@@ -97,6 +97,12 @@ case `uname` in
 esac
 
 PHP_BRANCH="5"
+
+# allow override of php branch easily (TODO: make this a ini file one day)
+if [ -f php_branch.txt ]; then
+	PHP_BRANCH=`cat php_branch.txt`
+fi
+
 PHP_PECL="imagick uuid APC memcached/stable svn mailparse mongo git://github.com/MagicalTux/btclib.git git://github.com/MagicalTux/php-git.git stomp yaml proctitle"
 # PECL DEPENCIES
 # imagick : libmagick6-dev
@@ -240,6 +246,13 @@ fi
 echo ""
 echo -n "Compiling..."
 make -j"$MAKE_PROCESSES" >make.log 2>&1
+
+if [ x"$?" != x"0 ]; then
+	echo "FAILED"
+	tail make.log
+	exit 1
+fi
+
 echo ""
 echo -n "Installing..."
 if [ ! -d "${PHP_PREFIX}/lib/php-web" ]; then
