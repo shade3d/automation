@@ -9,7 +9,7 @@ if [ `echo -n | grep -c -- -n` -gt 0 ]; then
 	exec bash "$0" "$@"
 fi
 OPTS="$@"
-SCRIPT_VERSION="1.56"
+SCRIPT_VERSION="1.57"
 
 SCRIPT_FORCE_REINSTALL=0
 SCRIPT_FORCE_UPDATE=0
@@ -62,7 +62,12 @@ if [ x"${APACHE_PREFIX}" = x ]; then
 	APACHE_PREFIX="/usr/local/httpd"
 fi
 
-echo "Using Apache in ${APACHE_PREFIX}"
+if [ ! -d "$APACHE_PREFIX" ]; then
+	APACHE_PREFIX=none
+	echo "Not using Apache"
+else
+	echo "Using Apache in ${APACHE_PREFIX}"
+fi
 
 if [ x"${PHP_PREFIX}" = x ]; then
 	PHP_PREFIX="/usr/local"
@@ -186,27 +191,45 @@ if [ x"$IS_CLEAN" != x"yes" ]; then
 	echo
 fi
 
-EXTRA_FLAGS=""
+CONFIGURE=()
+
+if [ x"$APACHE_PREFIX" = x"none" ]; then
+	CONFIGURE+=("--enable-fpm")
+else
+	CONFIGURE+=("--with-apxs2=${APACHE_PREFIX}/bin/apxs")
+fi
+
+CONFIGURE+=("--prefix=${PHP_PREFIX}" "--enable-inline-optimization")
+
+# encoding stuff
+CONFIGURE+=("--with-iconv" "--with-iconv-dir" "--enable-mbstring")
+# libintl (ICU)
+CONFIGURE+=("--enable-intl" "--with-icu-dir=$DEFAULT_PATH")
+# features
+CONFIGURE+=("--enable-calendar" "--enable-exif" "--enable-pcntl" "--enable-bcmath" "--with-gettext")
+# compression
+CONFIGURE+=("--with-zlib" "--with-zlib-dir=$DEFAULT_PATH" "--with-bz2" "--enable-zip")
+# MySQL
+CONFIGURE+=("--with-mysqli=mysqlnd" "--with-mysql=mysqlnd" "--with-pdo-mysql=mysqlnd")
+# GD
+CONFIGURE+=("--with-gd" "--enable-gd-native-ttf" "--with-jpeg-dir=$DEFAULT_PATH" "--with-png-dir=$DEFAULT_PATH" "--with-freetype-dir=$DEFAULT_PATH")
+# XML
+CONFIGURE+=("--enable-wddx" "--with-xmlrpc" "--with-xsl" --with-tidy" "--enable-soap")
+# OpenSSL
+CONFIGURE+=("--with-openssl" "--with-mhash" "--with-mcrypt" "--with-gmp=$DEFAULT_PATH")
+# Network
+CONFIGURE+=("--enable-sockets" "--enable-ftp" "--with-curl=$DEFAULT_PATH" "--with-imap" "--with-imap-ssl" "--with-ldap")
+# Basic stuff
+CONFIGURE+=("--with-config-file-path=${PHP_PREFIX}/lib/php-web" "--disable-cgi")
 
 # detect freetds and use
 if [ -f /usr/lib64/libsybdb.so ]; then
 	echo "Found MSSQL library, using it"
-	EXTRA_FLAGS="--with-mssql=/usr"
+	CONFIGURE+=("--with-mssql=/usr")
 fi
 
 echo -n "Configure... ";
-./configure >configure.log 2>&1 \
---with-apxs2="${APACHE_PREFIX}/bin/apxs" --prefix="${PHP_PREFIX}" --enable-ftp --with-iconv \
---with-mysqli="mysqlnd" --with-mysql="mysqlnd" --enable-calendar --enable-fpm \
---enable-exif --enable-wddx --enable-inline-optimization --with-gd \
---with-zlib --enable-gd-native-ttf --with-jpeg-dir="$DEFAULT_PATH" --with-png-dir="$DEFAULT_PATH" \
---with-zlib-dir="$DEFAULT_PATH" --with-freetype-dir="$DEFAULT_PATH" --with-openssl \
---with-curl="$DEFAULT_PATH" --with-zlib-dir="$DEFAULT_PATH" --enable-intl --with-icu-dir="$DEFAULT_PATH" \
---with-xmlrpc --with-xsl --with-tidy --with-iconv-dir --enable-sockets \
---enable-soap --enable-mbstring --with-imap --with-imap-ssl --with-bz2 \
---with-pdo-mysql="mysqlnd" --enable-pcntl --enable-bcmath \
---with-mhash --with-mcrypt --with-gmp="$DEFAULT_PATH" --with-gettext --with-ldap \
---with-config-file-path="${PHP_PREFIX}/lib/php-web" --disable-cgi --enable-zip $EXTRA_FLAGS
+./configure >configure.log 2>&1 "${CONFIGURE[@]}"
 
 if [ x"$?" != x"0" ]; then
 	echo "FAILED"
@@ -225,10 +248,14 @@ if [ ! -d "${PHP_PREFIX}/lib/php-web" ]; then
 fi
 
 # if using apache, we need to run that now to limit downtime
-env -i "${APACHE_PREFIX}/bin/apachectl" stop >/dev/null 2>&1 || true
-#killall -KILL httpd >/dev/null 2>&1 || true
-make install >make_install.log 2>&1
-env -i "${APACHE_PREFIX}/bin/apachectl" start
+if [ x"$APACHE_PREFIX" = x"none" ]; then
+	make install >make_install.log 2>&1
+else
+	env -i "${APACHE_PREFIX}/bin/apachectl" stop >/dev/null 2>&1 || true
+	#killall -KILL httpd >/dev/null 2>&1 || true
+	make install >make_install.log 2>&1
+	env -i "${APACHE_PREFIX}/bin/apachectl" start
+fi
 
 echo
 echo -n "Configuring PECL modules..."
@@ -291,10 +318,14 @@ for foo in ${PHP_PREFIX}/lib/php_mod/*.so; do
 	echo "extension = $foo" >>"${PHP_PREFIX}/lib/php-web/php.ini"
 done
 
-env -i "${APACHE_PREFIX}/bin/apachectl" stop >/dev/null 2>&1 || true
-#killall -KILL httpd >/dev/null 2>&1 || true
-sleep 1s
-#ipcs -s | grep nobody | perl -e 'while (<STDIN>) { @a=split(/\s+/); print `ipcrm sem $a[1]`}'
-env -i "${APACHE_PREFIX}/bin/apachectl" start
+if [ x"$APACHE_PREFIX" = x"none" ]; then
+	echo "You will need to fix the FPM binary"
+else
+	env -i "${APACHE_PREFIX}/bin/apachectl" stop >/dev/null 2>&1 || true
+	#killall -KILL httpd >/dev/null 2>&1 || true
+	sleep 1s
+	#ipcs -s | grep nobody | perl -e 'while (<STDIN>) { @a=split(/\s+/); print `ipcrm sem $a[1]`}'
+	env -i "${APACHE_PREFIX}/bin/apachectl" start
+fi
 echo ""
 echo "Installation complete."

@@ -62,7 +62,12 @@ if [ x"${APACHE_PREFIX}" = x ]; then
 	APACHE_PREFIX="/usr/local/httpd"
 fi
 
-echo "Using Apache in ${APACHE_PREFIX}"
+if [ ! -d "$APACHE_PREFIX" ]; then
+	APACHE_PREFIX=none
+	echo "Not using Apache"
+else
+	echo "Using Apache in ${APACHE_PREFIX}"
+fi
 
 # Detect if we're on a debian machine
 
