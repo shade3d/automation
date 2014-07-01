@@ -9,7 +9,7 @@ if [ `echo -n | grep -c -- -n` -gt 0 ]; then
 	exec bash "$0" "$@"
 fi
 OPTS="$@"
-SCRIPT_VERSION="1.57"
+SCRIPT_VERSION="1.58"
 
 SCRIPT_FORCE_REINSTALL=0
 SCRIPT_FORCE_UPDATE=0
@@ -235,7 +235,9 @@ if [ -f /usr/lib64/libsybdb.so ]; then
 fi
 
 echo -n "Configure... ";
-./configure >configure.log 2>&1 "${CONFIGURE[@]}"
+
+# force linking of libstdc++ by default since it is required but PHP doesn't handle it right
+LIBS="-lstdc++" ./configure >configure.log 2>&1 "${CONFIGURE[@]}"
 
 if [ x"$?" != x"0" ]; then
 	echo "FAILED"

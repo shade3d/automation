@@ -1,6 +1,6 @@
 changequote([","])dnl
 define(["M4_TARGET"],["get_php.sh"])dnl
-define(["M4_VERSION"],["1.57"])dnl
+define(["M4_VERSION"],["1.58"])dnl
 dnl rpm -i http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
 define(["M4_YUM_PKG"],["make gcc gcc-g++ zlib-devel openssl-devel libxml2-devel bzip2-devel libcurl-devel libjpeg-devel libpng-devel freetype-devel gmp-devel libc-client-devel libicu-devel openldap-devel libmcrypt-devel libtidy-devel libxslt-devel git ImageMagick-devel libmemcached-devel libyaml-devel libuuid-devel libmongodb-devel"])dnl
 include(bash.m4)dnl
@@ -148,7 +148,9 @@ if [ -f /usr/lib64/libsybdb.so ]; then
 fi
 
 echo -n "Configure... ";
-./configure >configure.log 2>&1 "${CONFIGURE[@]}"
+
+# force linking of libstdc++ by default since it is required but PHP doesn't handle it right
+LIBS="-lstdc++" ./configure >configure.log 2>&1 "${CONFIGURE[@]}"
 
 if [ x"$?" != x"0" ]; then
 	echo "FAILED"
