@@ -9,7 +9,7 @@ if [ `echo -n | grep -c -- -n` -gt 0 ]; then
 	exec bash "$0" "$@"
 fi
 OPTS="$@"
-SCRIPT_VERSION="1.58"
+SCRIPT_VERSION="1.59"
 
 SCRIPT_FORCE_REINSTALL=0
 SCRIPT_FORCE_UPDATE=0
@@ -249,7 +249,7 @@ echo ""
 echo -n "Compiling..."
 make -j"$MAKE_PROCESSES" >make.log 2>&1
 
-if [ x"$?" != x"0 ]; then
+if [ x"$?" != x"0" ]; then
 	echo "FAILED"
 	tail make.log
 	exit 1
