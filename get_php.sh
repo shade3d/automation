@@ -9,7 +9,7 @@ if [ `echo -n | grep -c -- -n` -gt 0 ]; then
 	exec bash "$0" "$@"
 fi
 OPTS="$@"
-SCRIPT_VERSION="1.59"
+SCRIPT_VERSION="1.60"
 
 SCRIPT_FORCE_REINSTALL=0
 SCRIPT_FORCE_UPDATE=0
@@ -103,7 +103,7 @@ if [ -f php_branch.txt ]; then
 	PHP_BRANCH=`cat php_branch.txt`
 fi
 
-PHP_PECL="imagick uuid APC memcached/stable svn mailparse mongo git://github.com/MagicalTux/btclib.git git://github.com/MagicalTux/php-git.git stomp yaml proctitle"
+PHP_PECL="imagick uuid APC memcached/stable svn mailparse mongo git://github.com/MagicalTux/btclib.git git://github.com/MagicalTux/php-git.git stomp yaml proctitle v8js"
 # PECL DEPENCIES
 # imagick : libmagick6-dev
 
