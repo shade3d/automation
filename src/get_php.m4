@@ -16,7 +16,7 @@ if [ -f php_branch.txt ]; then
 	PHP_BRANCH=`cat php_branch.txt`
 fi
 
-PHP_PECL="imagick uuid APC memcached/stable svn mailparse mongo git://github.com/MagicalTux/btclib.git git://github.com/MagicalTux/php-git.git stomp yaml proctitle v8js"
+PHP_PECL="imagick uuid memcached/stable svn mailparse mongo git://github.com/MagicalTux/btclib.git git://github.com/MagicalTux/php-git.git stomp yaml proctitle v8js"
 # PECL DEPENCIES
 # imagick : libmagick6-dev
 
