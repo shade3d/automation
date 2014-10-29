@@ -8,8 +8,12 @@ if [ `echo -n | grep -c -- -n` -gt 0 ]; then
 	fi
 	exec bash "$0" "$@"
 fi
+
+# fail on errors
+set -e
+
 OPTS="$@"
-SCRIPT_VERSION="1.60"
+SCRIPT_VERSION="1.61"
 
 SCRIPT_FORCE_REINSTALL=0
 SCRIPT_FORCE_UPDATE=0
@@ -103,7 +107,7 @@ if [ -f php_branch.txt ]; then
 	PHP_BRANCH=`cat php_branch.txt`
 fi
 
-PHP_PECL="imagick uuid memcached/stable svn mailparse mongo git://github.com/MagicalTux/btclib.git git://github.com/MagicalTux/php-git.git stomp yaml proctitle v8js"
+PHP_PECL="imagick uuid memcached/stable svn mailparse mongo git://github.com/MagicalTux/btclib.git git://github.com/libgit2/php-git.git stomp yaml proctitle v8js"
 # PECL DEPENCIES
 # imagick : libmagick6-dev
 
@@ -281,6 +285,7 @@ echo "extension_dir = ${PHP_PREFIX}/lib/php_mod" >>"${PHP_PREFIX}/lib/php-web/ph
 mkdir -p mod
 cd mod
 for foo in $PHP_PECL; do
+	PECL_CONFIGURE=()
 	if [ `echo "$foo" | grep -c '^git://'` = "1" ]; then
 		# git repo
 		NAME=`echo "$foo" | sed -e 's#.*/##;s/\.git$//'`
@@ -293,11 +298,25 @@ for foo in $PHP_PECL; do
 			cd "$NAME"
 		fi
 		echo -n "[git] "
+		if [ "$NAME" = "php-git" ]; then
+			echo -n "[libgit2:"
+			if [ ! -d libgit2/build ]; then
+				git submodule init
+				git submodule update
+				mkdir libgit2/build
+				cd libgit2/build
+				cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF -DBUILD_CLAR=OFF -DCMAKE_C_FLAGS=-fPIC .. >../../libgit2_cmake_init.log 2>&1
+				cmake --build . >../../libgit2_cmake_compile.log 2>&1
+				cd ../..
+			fi
+			echo -n "ok]"
+			PECL_CONFIGURE+=("--enable-git2-debug")
+		fi
 		"${PHP_PREFIX}/bin/phpize" >phpize.log 2>&1
 		if [ $? != 0 ]; then
 			continue;
 		fi
-		./configure >configure.log 2>&1
+		./configure >configure.log 2>&1 "${CONFIGURE[@]}"
 		make -j"$MAKE_PROCESSES" >make.log 2>&1
 		cp modules/* "${PHP_PREFIX}/lib/php_mod"
 		cd ..
