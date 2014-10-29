@@ -226,10 +226,7 @@ for foo in $PHP_PECL; do
 			PECL_CONFIGURE+=("--enable-git2-debug")
 		fi
 		echo -n "[git] "
-		"${PHP_PREFIX}/bin/phpize" >phpize.log 2>&1
-		if [ $? != 0 ]; then
-			continue;
-		fi
+		"${PHP_PREFIX}/bin/phpize" >phpize.log 2>&1 || echo -n "[fail] " && continue
 		./configure >configure.log 2>&1 "${CONFIGURE[@]}"
 		make -j"$MAKE_PROCESSES" >make.log 2>&1
 		cp modules/* "${PHP_PREFIX}/lib/php_mod"
