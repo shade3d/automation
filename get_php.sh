@@ -10,7 +10,7 @@ if [ `echo -n | grep -c -- -n` -gt 0 ]; then
 fi
 
 OPTS="$@"
-SCRIPT_VERSION="1.62"
+SCRIPT_VERSION="1.63"
 
 SCRIPT_FORCE_REINSTALL=0
 SCRIPT_FORCE_UPDATE=0
@@ -104,7 +104,7 @@ if [ -f php_branch.txt ]; then
 	PHP_BRANCH=`cat php_branch.txt`
 fi
 
-PHP_PECL="imagick uuid memcached/stable svn mailparse mongo git://github.com/MagicalTux/btclib.git git://github.com/libgit2/php-git.git stomp yaml proctitle v8js"
+PHP_PECL="imagick uuid memcached/stable svn mailparse mongo git://github.com/MagicalTux/btclib.git git://github.com/libgit2/php-git.git stomp yaml proctitle git://github.com/preillyme/v8js.git"
 # PECL DEPENCIES
 # imagick : libmagick6-dev
 
@@ -289,7 +289,7 @@ for foo in $PHP_PECL; do
 		echo -n "$NAME"
 		if [ -d "$NAME" ]; then
 			cd "$NAME"
-			git pull -n
+			git pull -n -q
 		else
 			git clone -q "$foo" "$NAME"
 			cd "$NAME"
@@ -313,6 +313,45 @@ for foo in $PHP_PECL; do
 			echo -n "ok]"
 			PECL_CONFIGURE+=("--enable-git2-debug")
 		fi
+		if [ "$foo" = "v8js" ]; then
+			if [ ! -f /usr/lib/libv8.so ]; then
+				# get v8 from git (repo is huge, get ready for >100MB dl)
+				echo -n "[v8:pull.."
+					if [ -d v8 ]; then
+					cd v8
+					git pull -n -q
+				else
+					git clone -q https://github.com/v8/v8.git
+					cd v8
+				fi
+				# version 3.30.20 is known to work with this ext
+				if [ ! -d depot_tools ]; then
+					svn checkout -q http://src.chromium.org/svn/trunk/tools/depot_tools
+					# small handler for python to help point to python2.7
+					echo '#!/bin/sh' >depot_tools/python
+					echo 'if [ -x /usr/bin/python2.7 ]; then' >>depot_tools/python
+					echo '	exec /usr/bin/python2.7 "$@"' >>depot_tools/python
+					echo 'else' >>depot_tools/python
+					echo '	exec python "$@"' >>depot_tools/python
+					echo 'fi' >>depot_tools/python
+					chmod +x depot_tools/python
+				fi
+				echo -n "dep.."
+				PATH="`pwd`/depot_tools:$PATH" make dependencies >../v8_dep.log 2>&1
+				echo -n "build.."
+				PATH="`pwd`/depot_tools:$PATH" make native GYPFLAGS="-Duse_system_icu=1 -Dcomponent=shared_library" -j"$MAKE_PROCESSES"
+
+				echo -n "install.."
+				cp out/native/lib.target/libv8.so /usr/lib/libv8.so
+				cp out/native/obj.target/tools/gyp/libv8_libplatform.a /usr/lib/libv8_libplatform.a
+				cp include/v8* /usr/include
+				cp -r include/libplatform /usr/include
+
+				# Uninstall: rm -fr /usr/lib/libv8.so /usr/lib/libv8_libplatform.a /usr/include/v8* /usr/include/libplatform
+
+				echo -n "ok]"
+			fi
+		fi
 		echo -n "[git] "
 		"${PHP_PREFIX}/bin/phpize" >phpize.log 2>&1 || echo -n "[fail] " && continue
 		./configure >configure.log 2>&1 "${CONFIGURE[@]}"
@@ -330,8 +369,8 @@ for foo in $PHP_PECL; do
 		continue;
 	fi
 	pecl_version=`echo "$dr" | $SED -e 's/^.*-//'`
-	echo -n "[$pecl_version] "
 	cd $dr
+	echo -n "[$pecl_version] "
 	"${PHP_PREFIX}/bin/phpize" >phpize.log 2>&1 || echo -n "[fail] " && continue
 	./configure >configure.log 2>&1
 	make -j"$MAKE_PROCESSES" >make.log 2>&1

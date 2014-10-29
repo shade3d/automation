@@ -1,6 +1,6 @@
 changequote([","])dnl
 define(["M4_TARGET"],["get_php.sh"])dnl
-define(["M4_VERSION"],["1.62"])dnl
+define(["M4_VERSION"],["1.63"])dnl
 dnl rpm -i http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
 define(["M4_YUM_PKG"],["make gcc gcc-g++ zlib-devel openssl-devel libxml2-devel bzip2-devel libcurl-devel libjpeg-devel libpng-devel freetype-devel gmp-devel libc-client-devel libicu-devel openldap-devel libmcrypt-devel libtidy-devel libxslt-devel git ImageMagick-devel libmemcached-devel libyaml-devel libuuid-devel libmongodb-devel"])dnl
 include(bash.m4)dnl
@@ -226,34 +226,43 @@ for foo in $PHP_PECL; do
 			PECL_CONFIGURE+=("--enable-git2-debug")
 		fi
 		if [ "$foo" = "v8js" ]; then
-			# get v8 from git (repo is huge, get ready for >100MB dl)
-			echo -n "[v8:pull.."
-			if [ -d v8 ]; then
-				cd v8
-				git pull -n -q
-			else
-				git clone -q https://github.com/v8/v8.git
-				cd v8
-			fi
-			# version 3.21.11 is known to work with this ext
-			git checkout 3.21.11
-			if [ ! -d depot_tools ]; then
-				svn checkout http://src.chromium.org/svn/trunk/tools/depot_tools
-				# small handler for python to help point to python2.7
-				echo '#!/bin/sh' >depot_tools/python
-				echo 'if [ -x /usr/bin/python2.7 ]; then' >>depot_tools/python
-				echo '	exec /usr/bin/python2.7 "$@"' >>depot_tools/python
-				echo 'else' >>depot_tools/python
-				echo '	exec python "$@"' >>depot_tools/python
-				echo 'fi' >>depot_tools/python
-				chmod +x depot_tools/python
-			fi
-			echo -n "dep.."
-			PATH="`pwd`/depot_tools:$PATH" make dependencies >../v8_dep.log 2>&1
-			echo -n "build.."
-			PATH="`pwd`/depot_tools:$PATH" make native library=shared -j"$MAKE_PROCESSES"
+			if [ ! -f /usr/lib/libv8.so ]; then
+				# get v8 from git (repo is huge, get ready for >100MB dl)
+				echo -n "[v8:pull.."
+					if [ -d v8 ]; then
+					cd v8
+					git pull -n -q
+				else
+					git clone -q https://github.com/v8/v8.git
+					cd v8
+				fi
+				# version 3.30.20 is known to work with this ext
+				if [ ! -d depot_tools ]; then
+					svn checkout -q http://src.chromium.org/svn/trunk/tools/depot_tools
+					# small handler for python to help point to python2.7
+					echo '#!/bin/sh' >depot_tools/python
+					echo 'if [ -x /usr/bin/python2.7 ]; then' >>depot_tools/python
+					echo '	exec /usr/bin/python2.7 "$@"' >>depot_tools/python
+					echo 'else' >>depot_tools/python
+					echo '	exec python "$@"' >>depot_tools/python
+					echo 'fi' >>depot_tools/python
+					chmod +x depot_tools/python
+				fi
+				echo -n "dep.."
+				PATH="`pwd`/depot_tools:$PATH" make dependencies >../v8_dep.log 2>&1
+				echo -n "build.."
+				PATH="`pwd`/depot_tools:$PATH" make native GYPFLAGS="-Duse_system_icu=1 -Dcomponent=shared_library" -j"$MAKE_PROCESSES"
 
-			echo -n "ok]"
+				echo -n "install.."
+				cp out/native/lib.target/libv8.so /usr/lib/libv8.so
+				cp out/native/obj.target/tools/gyp/libv8_libplatform.a /usr/lib/libv8_libplatform.a
+				cp include/v8* /usr/include
+				cp -r include/libplatform /usr/include
+
+				# Uninstall: rm -fr /usr/lib/libv8.so /usr/lib/libv8_libplatform.a /usr/include/v8* /usr/include/libplatform
+
+				echo -n "ok]"
+			fi
 		fi
 		echo -n "[git] "
 		"${PHP_PREFIX}/bin/phpize" >phpize.log 2>&1 || echo -n "[fail] " && continue
