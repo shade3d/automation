@@ -343,7 +343,7 @@ for foo in $PHP_PECL; do
 
 				echo -n "install.."
 				cp out/native/lib.target/libv8.so /usr/lib/libv8.so
-				cp out/native/obj.target/tools/gyp/libv8_libplatform.a /usr/lib/libv8_libplatform.a
+				echo -e "create /usr/lib/libv8_libplatform.a\naddlib out/native/obj.target/tools/gyp/libv8_libplatform.a\nsave\nend" | ar -M
 				cp include/v8* /usr/include
 				cp -r include/libplatform /usr/include
 
