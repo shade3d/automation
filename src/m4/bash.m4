@@ -9,6 +9,3 @@ if [ `echo -n | grep -c -- -n` -gt 0 ]; then
 	exec bash "$0" "$@"
 fi
 
-# fail on errors
-set -e
-

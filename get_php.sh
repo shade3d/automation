@@ -9,9 +9,6 @@ if [ `echo -n | grep -c -- -n` -gt 0 ]; then
 	exec bash "$0" "$@"
 fi
 
-# fail on errors
-set -e
-
 OPTS="$@"
 SCRIPT_VERSION="1.62"
 
@@ -317,10 +314,7 @@ for foo in $PHP_PECL; do
 			PECL_CONFIGURE+=("--enable-git2-debug")
 		fi
 		echo -n "[git] "
-		"${PHP_PREFIX}/bin/phpize" >phpize.log 2>&1
-		if [ $? != 0 ]; then
-			continue;
-		fi
+		"${PHP_PREFIX}/bin/phpize" >phpize.log 2>&1 || echo -n "[fail] " && continue
 		./configure >configure.log 2>&1 "${CONFIGURE[@]}"
 		make -j"$MAKE_PROCESSES" >make.log 2>&1
 		cp modules/* "${PHP_PREFIX}/lib/php_mod"
@@ -338,10 +332,7 @@ for foo in $PHP_PECL; do
 	pecl_version=`echo "$dr" | $SED -e 's/^.*-//'`
 	echo -n "[$pecl_version] "
 	cd $dr
-	"${PHP_PREFIX}/bin/phpize" >phpize.log 2>&1
-	if [ $? != 0 ]; then
-		continue;
-	fi
+	"${PHP_PREFIX}/bin/phpize" >phpize.log 2>&1 || echo -n "[fail] " && continue
 	./configure >configure.log 2>&1
 	make -j"$MAKE_PROCESSES" >make.log 2>&1
 	cp modules/* "${PHP_PREFIX}/lib/php_mod"

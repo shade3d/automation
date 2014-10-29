@@ -244,10 +244,7 @@ for foo in $PHP_PECL; do
 	pecl_version=`echo "$dr" | $SED -e 's/^.*-//'`
 	echo -n "[$pecl_version] "
 	cd $dr
-	"${PHP_PREFIX}/bin/phpize" >phpize.log 2>&1
-	if [ $? != 0 ]; then
-		continue;
-	fi
+	"${PHP_PREFIX}/bin/phpize" >phpize.log 2>&1 || echo -n "[fail] " && continue
 	./configure >configure.log 2>&1
 	make -j"$MAKE_PROCESSES" >make.log 2>&1
 	cp modules/* "${PHP_PREFIX}/lib/php_mod"
