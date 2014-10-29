@@ -1,6 +1,6 @@
 changequote([","])dnl
 define(["M4_TARGET"],["get_php.sh"])dnl
-define(["M4_VERSION"],["1.61"])dnl
+define(["M4_VERSION"],["1.62"])dnl
 dnl rpm -i http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
 define(["M4_YUM_PKG"],["make gcc gcc-g++ zlib-devel openssl-devel libxml2-devel bzip2-devel libcurl-devel libjpeg-devel libpng-devel freetype-devel gmp-devel libc-client-devel libicu-devel openldap-devel libmcrypt-devel libtidy-devel libxslt-devel git ImageMagick-devel libmemcached-devel libyaml-devel libuuid-devel libmongodb-devel"])dnl
 include(bash.m4)dnl
@@ -206,7 +206,6 @@ for foo in $PHP_PECL; do
 			git clone -q "$foo" "$NAME"
 			cd "$NAME"
 		fi
-		echo -n "[git] "
 		if [ "$NAME" = "php-git" ]; then
 			echo -n "[libgit2:"
 			if [ ! -d libgit2/build ]; then
@@ -217,10 +216,16 @@ for foo in $PHP_PECL; do
 				cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF -DBUILD_CLAR=OFF -DCMAKE_C_FLAGS=-fPIC .. >../../libgit2_cmake_init.log 2>&1
 				cmake --build . >../../libgit2_cmake_compile.log 2>&1
 				cd ../..
+			elif [ ! -f libgit2/build/libgit2.a ]; then
+				# erased by make clean
+				cd libgit2/build
+				cmake --build . >../../libgit2_cmake_compile.log 2>&1
+				cd ../..
 			fi
 			echo -n "ok]"
 			PECL_CONFIGURE+=("--enable-git2-debug")
 		fi
+		echo -n "[git] "
 		"${PHP_PREFIX}/bin/phpize" >phpize.log 2>&1
 		if [ $? != 0 ]; then
 			continue;
@@ -231,7 +236,6 @@ for foo in $PHP_PECL; do
 		cd ..
 		continue
 	fi
-	# git://github.com/libgit2/php-git.git
 
 	echo -n "$foo"
 	curl -s "http://pecl.php.net/get/$foo" | tar xzf /dev/stdin >/dev/null 2>&1

@@ -13,7 +13,7 @@ fi
 set -e
 
 OPTS="$@"
-SCRIPT_VERSION="1.61"
+SCRIPT_VERSION="1.62"
 
 SCRIPT_FORCE_REINSTALL=0
 SCRIPT_FORCE_UPDATE=0
@@ -297,7 +297,6 @@ for foo in $PHP_PECL; do
 			git clone -q "$foo" "$NAME"
 			cd "$NAME"
 		fi
-		echo -n "[git] "
 		if [ "$NAME" = "php-git" ]; then
 			echo -n "[libgit2:"
 			if [ ! -d libgit2/build ]; then
@@ -308,10 +307,16 @@ for foo in $PHP_PECL; do
 				cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF -DBUILD_CLAR=OFF -DCMAKE_C_FLAGS=-fPIC .. >../../libgit2_cmake_init.log 2>&1
 				cmake --build . >../../libgit2_cmake_compile.log 2>&1
 				cd ../..
+			elif [ ! -f libgit2/build/libgit2.a ]; then
+				# erased by make clean
+				cd libgit2/build
+				cmake --build . >../../libgit2_cmake_compile.log 2>&1
+				cd ../..
 			fi
 			echo -n "ok]"
 			PECL_CONFIGURE+=("--enable-git2-debug")
 		fi
+		echo -n "[git] "
 		"${PHP_PREFIX}/bin/phpize" >phpize.log 2>&1
 		if [ $? != 0 ]; then
 			continue;
@@ -322,7 +327,6 @@ for foo in $PHP_PECL; do
 		cd ..
 		continue
 	fi
-	# git://github.com/libgit2/php-git.git
 
 	echo -n "$foo"
 	curl -s "http://pecl.php.net/get/$foo" | tar xzf /dev/stdin >/dev/null 2>&1
