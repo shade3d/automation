@@ -209,8 +209,8 @@ for foo in $PHP_PECL; do
 		if [ "$NAME" = "php-git" ]; then
 			echo -n "[libgit2:"
 			if [ ! -d libgit2/build ]; then
-				git submodule init
-				git submodule update
+				git submodule init -q
+				git submodule update -q
 				mkdir libgit2/build
 				cd libgit2/build
 				cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF -DBUILD_CLAR=OFF -DCMAKE_C_FLAGS=-fPIC .. >../../libgit2_cmake_init.log 2>&1
