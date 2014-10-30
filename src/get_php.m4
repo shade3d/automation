@@ -1,6 +1,6 @@
 changequote([","])dnl
 define(["M4_TARGET"],["get_php.sh"])dnl
-define(["M4_VERSION"],["1.63"])dnl
+define(["M4_VERSION"],["1.64"])dnl
 dnl rpm -i http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
 define(["M4_YUM_PKG"],["make gcc gcc-g++ zlib-devel openssl-devel libxml2-devel bzip2-devel libcurl-devel libjpeg-devel libpng-devel freetype-devel gmp-devel libc-client-devel libicu-devel openldap-devel libmcrypt-devel libtidy-devel libxslt-devel git ImageMagick-devel libmemcached-devel libyaml-devel libuuid-devel libmongodb-devel"])dnl
 include(bash.m4)dnl
@@ -236,7 +236,7 @@ for foo in $PHP_PECL; do
 					git clone -q https://github.com/v8/v8.git
 					cd v8
 				fi
-				# version 3.30.20 is known to work with this ext
+				# version 3.30.00 is known to work with this ext
 				if [ ! -d depot_tools ]; then
 					svn checkout -q http://src.chromium.org/svn/trunk/tools/depot_tools
 					# small handler for python to help point to python2.7
@@ -255,7 +255,7 @@ for foo in $PHP_PECL; do
 
 				echo -n "install.."
 				cp out/native/lib.target/libv8.so /usr/lib/libv8.so
-				echo -e "create /usr/lib/libv8_libplatform.a\naddlib out/native/obj.target/tools/gyp/libv8_libplatform.a\nsave\nend" | ar -M
+				echo -e "create /usr/lib/libv8_libplatform.a\naddlib out/native/obj.target/tools/gyp/libv8_libplatform.a\naddlib out/native/obj.target/tools/gyp/libv8_libbase.a\nsave\nend" | ar -M
 				cp include/v8* /usr/include
 				cp -r include/libplatform /usr/include
 

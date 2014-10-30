@@ -10,7 +10,7 @@ if [ `echo -n | grep -c -- -n` -gt 0 ]; then
 fi
 
 OPTS="$@"
-SCRIPT_VERSION="1.63"
+SCRIPT_VERSION="1.64"
 
 SCRIPT_FORCE_REINSTALL=0
 SCRIPT_FORCE_UPDATE=0
@@ -297,8 +297,8 @@ for foo in $PHP_PECL; do
 		if [ "$NAME" = "php-git" ]; then
 			echo -n "[libgit2:"
 			if [ ! -d libgit2/build ]; then
-				git submodule init
-				git submodule update
+				git submodule init -q
+				git submodule update -q
 				mkdir libgit2/build
 				cd libgit2/build
 				cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF -DBUILD_CLAR=OFF -DCMAKE_C_FLAGS=-fPIC .. >../../libgit2_cmake_init.log 2>&1
@@ -324,7 +324,7 @@ for foo in $PHP_PECL; do
 					git clone -q https://github.com/v8/v8.git
 					cd v8
 				fi
-				# version 3.30.20 is known to work with this ext
+				# version 3.30.00 is known to work with this ext
 				if [ ! -d depot_tools ]; then
 					svn checkout -q http://src.chromium.org/svn/trunk/tools/depot_tools
 					# small handler for python to help point to python2.7
@@ -343,7 +343,7 @@ for foo in $PHP_PECL; do
 
 				echo -n "install.."
 				cp out/native/lib.target/libv8.so /usr/lib/libv8.so
-				echo -e "create /usr/lib/libv8_libplatform.a\naddlib out/native/obj.target/tools/gyp/libv8_libplatform.a\nsave\nend" | ar -M
+				echo -e "create /usr/lib/libv8_libplatform.a\naddlib out/native/obj.target/tools/gyp/libv8_libplatform.a\naddlib out/native/obj.target/tools/gyp/libv8_libbase.a\nsave\nend" | ar -M
 				cp include/v8* /usr/include
 				cp -r include/libplatform /usr/include
 
