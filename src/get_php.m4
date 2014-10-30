@@ -251,11 +251,11 @@ for foo in $PHP_PECL; do
 				echo -n "dep.."
 				PATH="`pwd`/depot_tools:$PATH" make dependencies >../v8_dep.log 2>&1
 				echo -n "build.."
-				PATH="`pwd`/depot_tools:$PATH" make native GYPFLAGS="-Duse_system_icu=1 -Dcomponent=shared_library" -j"$MAKE_PROCESSES"
+				PATH="`pwd`/depot_tools:$PATH" make native GYPFLAGS="-Duse_system_icu=1 -Dcomponent=shared_library -Dv8_enable_backtrace=1 -Darm_fpu=default -Darm_float_abi=default" -j"$MAKE_PROCESSES" >../v8_make.log 2>&1
 
 				echo -n "install.."
 				cp out/native/lib.target/libv8.so /usr/lib/libv8.so
-				cp out/native/obj.target/tools/gyp/libv8_libplatform.a /usr/lib/libv8_libplatform.a
+				echo -e "create /usr/lib/libv8_libplatform.a\naddlib out/native/obj.target/tools/gyp/libv8_libplatform.a\nsave\nend" | ar -M
 				cp include/v8* /usr/include
 				cp -r include/libplatform /usr/include
 
