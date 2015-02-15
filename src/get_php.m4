@@ -74,7 +74,7 @@ fi
 # download mail patch
 #if [ ! -f "$PHP_MAIL_PATCH_FILE" ]; then
 #	echo -n "Downloading $PHP_MAIL_PATCH_FILE ..."
-#	wget -q -O "$PHP_MAIL_PATCH_FILE" "https://raw.githubusercontent.com/Tibanne/automation/master/$PHP_MAIL_PATCH_FILE"
+#	wget -q -O "$PHP_MAIL_PATCH_FILE" "https://raw.githubusercontent.com/MagicalTux/automation/master/$PHP_MAIL_PATCH_FILE"
 #	if [ $? != "0" ]; then
 #		echo "Could not download $PHP_MAIL_PATCH_FILE"
 #		exit 1

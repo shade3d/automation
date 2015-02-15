@@ -34,7 +34,7 @@ done
 
 if [ x"$SCRIPT_FORCE_UPDATE" = x1 ]; then
 	echo "Updating full.sh, please wait..."
-	curl -s "https://raw.githubusercontent.com/Tibanne/automation/master/full.sh" >full.sh~
+	curl -s "https://raw.githubusercontent.com/MagicalTux/automation/master/full.sh" >full.sh~
 	if [ "$?" != "0" ]; then
 		echo "An error occured while downloading the new full.sh. Aborting update..."
 		exit
@@ -44,11 +44,11 @@ if [ x"$SCRIPT_FORCE_UPDATE" = x1 ]; then
 fi
 # Do we have last version?
 echo -n "Checking for last version of full.sh..."
-LAST_VERSION=`curl -s "https://raw.githubusercontent.com/Tibanne/automation/master/versions.txt" | grep "^full.sh" | awk '{ print $2 }'`
+LAST_VERSION=`curl -s "https://raw.githubusercontent.com/MagicalTux/automation/master/versions.txt" | grep "^full.sh" | awk '{ print $2 }'`
 if [ x"$LAST_VERSION" != x"$SCRIPT_VERSION" ]; then
 	echo "new version available"
 	echo "Updating full.sh, please wait..."
-	curl -s "https://raw.githubusercontent.com/Tibanne/automation/master/full.sh" >full.sh~
+	curl -s "https://raw.githubusercontent.com/MagicalTux/automation/master/full.sh" >full.sh~
 	if [ "$?" != "0" ]; then
 		echo "An error occured while downloading the new full.sh. Aborting update..."
 	else
