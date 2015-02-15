@@ -265,7 +265,7 @@ for foo in $PHP_PECL; do
 			fi
 		fi
 		echo -n "[git] "
-		"${PHP_PREFIX}/bin/phpize" >phpize.log 2>&1 || echo -n "[fail] " && continue
+		"${PHP_PREFIX}/bin/phpize" >phpize.log 2>&1 || ( echo -n "[fail] " && continue )
 		./configure >configure.log 2>&1 "${CONFIGURE[@]}"
 		make -j"$MAKE_PROCESSES" >make.log 2>&1
 		cp modules/* "${PHP_PREFIX}/lib/php_mod"
@@ -283,7 +283,7 @@ for foo in $PHP_PECL; do
 	pecl_version=`echo "$dr" | $SED -e 's/^.*-//'`
 	cd $dr
 	echo -n "[$pecl_version] "
-	"${PHP_PREFIX}/bin/phpize" >phpize.log 2>&1 || echo -n "[fail] " && continue
+	"${PHP_PREFIX}/bin/phpize" >phpize.log 2>&1 || ( echo -n "[fail] " && continue )
 	./configure >configure.log 2>&1
 	make -j"$MAKE_PROCESSES" >make.log 2>&1
 	cp modules/* "${PHP_PREFIX}/lib/php_mod"
