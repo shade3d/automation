@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # check for correct interpreter
 if [ `echo -n | grep -c -- -n` -gt 0 ]; then
