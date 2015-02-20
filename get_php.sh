@@ -225,7 +225,7 @@ CONFIGURE+=("--enable-wddx" "--with-xmlrpc" "--with-xsl" "--with-tidy" "--enable
 # OpenSSL
 CONFIGURE+=("--with-openssl" "--with-mhash" "--with-mcrypt" "--with-gmp=$DEFAULT_PATH")
 # Network
-CONFIGURE+=("--enable-sockets" "--enable-ftp" "--with-curl=$DEFAULT_PATH" "--with-imap" "--with-imap-ssl" "--with-ldap")
+CONFIGURE+=("--enable-sockets" "--enable-ftp" "--with-curl=$DEFAULT_PATH" "--with-imap" "--with-imap-ssl")
 # Basic stuff
 CONFIGURE+=("--with-config-file-path=${PHP_PREFIX}/lib/php-web" "--disable-cgi")
 
