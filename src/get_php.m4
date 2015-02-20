@@ -147,6 +147,11 @@ if [ -f /usr/lib64/libsybdb.so ]; then
 	CONFIGURE+=("--with-mssql=/usr")
 fi
 
+if [ `ldd /usr/lib/libc-client.so | grep -c libgssapi` -gt 0 ]; then
+	# libc-client uses krb, need to enable it
+	CONFIGURE+=("--with-kerberos")
+fi
+
 echo -n "Configure... ";
 
 # force linking of libstdc++ by default since it is required but PHP doesn't handle it right
