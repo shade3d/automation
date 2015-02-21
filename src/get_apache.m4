@@ -1,13 +1,13 @@
 changequote([","])dnl
 define(["M4_TARGET"],["get_apache.sh"])dnl
-define(["M4_VERSION"],["1.16"])dnl
+define(["M4_VERSION"],["1.17"])dnl
 define(["M4_YUM_PKG"],["Percona-Server-devel-55 make gcc gcc-g++ zlib-devel openssl-devel"])dnl
 include(bash.m4)dnl
 include(version.m4)dnl
 include(apache.m4)dnl
 include(os.m4)dnl
 
-APACHE_BRANCH="2.2"
+APACHE_BRANCH="2.4"
 
 if [ x"$APACHE_PREFIX" = x"none" ]; then
 	APACHE_PREFIX=/usr/local/httpd

@@ -10,7 +10,7 @@ if [ `echo -n | grep -c -- -n` -gt 0 ]; then
 fi
 
 OPTS="$@"
-SCRIPT_VERSION="1.16"
+SCRIPT_VERSION="1.17"
 
 SCRIPT_FORCE_REINSTALL=0
 SCRIPT_FORCE_UPDATE=0
@@ -93,7 +93,7 @@ case `uname` in
 		;;
 esac
 
-APACHE_BRANCH="2.2"
+APACHE_BRANCH="2.4"
 
 if [ x"$APACHE_PREFIX" = x"none" ]; then
 	APACHE_PREFIX=/usr/local/httpd
