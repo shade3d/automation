@@ -1,6 +1,6 @@
 changequote([","])dnl
 define(["M4_TARGET"],["get_apache.sh"])dnl
-define(["M4_VERSION"],["1.17"])dnl
+define(["M4_VERSION"],["1.18"])dnl
 define(["M4_YUM_PKG"],["Percona-Server-devel-55 make gcc gcc-g++ zlib-devel openssl-devel"])dnl
 include(bash.m4)dnl
 include(version.m4)dnl
@@ -8,6 +8,7 @@ include(apache.m4)dnl
 include(os.m4)dnl
 
 APACHE_BRANCH="2.4"
+APR_BRANCH="1.5"
 
 if [ x"$APACHE_PREFIX" = x"none" ]; then
 	APACHE_PREFIX=/usr/local/httpd
@@ -77,11 +78,112 @@ if [ x"$ORIGINAL_MD5" != x"$OUR_MD5" ]; then
 fi
 echo "done"
 
+# Check for APR
+echo -n "Checking for last version of apr and apr-util: "
+APR_PAGE=`curl -s "http://apr.apache.org/download.cgi"`
+APR_ARCHIVE=`echo "$APR_PAGE" | grep "tar.bz2" | grep -m1 "apr-$APR_BRANCH" | "$SED" -r -e 's/^.*href="//;s/".*$//'`
+APR_FILENAME=`basename "$APR_ARCHIVE"`
+APR_DIRNAME=`basename "$APR_ARCHIVE" .tar.bz2`
+APR_VERSION=`echo "$APR_FILENAME"  | "$SED" -e 's/.*-//;s/.tar.bz2//'`
+# do not trust the webpage for the MD5
+APR_MD5="http://www.apache.org/dist/apr/$APR_FILENAME.md5"
+
+echo -n "apr-$APR_VERSION "
+
+APR_UTIL_ARCHIVE=`echo "$APR_PAGE" | grep "tar.bz2" | grep -m1 "apr-util-$APR_BRANCH" | "$SED" -r -e 's/^.*href="//;s/".*$//'`
+APR_UTIL_FILENAME=`basename "$APR_UTIL_ARCHIVE"`
+APR_UTIL_DIRNAME=`basename "$APR_UTIL_ARCHIVE" .tar.bz2`
+APR_UTIL_VERSION=`echo "$APR_UTIL_FILENAME"  | "$SED" -e 's/.*-//;s/.tar.bz2//'`
+# do not trust the webpage for the MD5
+APR_UTIL_MD5="http://www.apache.org/dist/apr/$APR_UTIL_FILENAME.md5"
+
+echo "apr-util-$APR_UTIL_VERSION"
+
+
 if [ ! -d "$APACHE_DIRNAME" ]; then
 	echo -n "Extracting Apache $APACHE_VERSION... "
 	tar xjf "$APACHE_FILENAME"
 	echo "done"
 fi
+
+if [ ! -d "$APACHE_DIRNAME/srclib/$APR_DIRNAME" ]; then
+	if [ ! -f "$APR_FILENAME" ]; then
+		echo -n "Downloading $APR_FILENAME... "
+		wget -q -O "$APR_FILENAME" "$APR_ARCHIVE"
+		if [ $? != "0" ]; then
+			echo "failed"
+			echo "Please restart this script to try another mirror."
+			echo "Failed url: $APR_ARCHIVE"
+			rm -f "$APR_FILENAME"
+			exit 1
+		fi
+		echo "done"
+	fi
+
+	echo -n "Checking archive MD5 sum... "
+	ORIGINAL_MD5=`curl -s "$APR_MD5" | grep -m1 "$APR_FILENAME" | "$SED" -r -e 's/.*([0-9a-f]{32}).*/\1/'`
+	if [ "$MD5" = md5sum ]; then
+		OUR_MD5=`md5sum "$APR_FILENAME" | grep -m1 "$APR_FILENAME" | sed -r -e 's/ .*$//'`
+	else
+		OUR_MD5=`md5 -q "$APR_FILENAME"`
+	fi
+
+	if [ x"$ORIGINAL_MD5" != x"$OUR_MD5" ]; then
+		echo "failed"
+		echo "Original MD5: $ORIGINAL_MD5"
+		echo "Local MD5   : $OUR_MD5"
+		echo "Mirror      : $APR_ARCHIVE"
+		echo "Please try restarting this script"
+		rm -f "$APR_FILENAME"
+		exit 1
+	fi
+	echo "done"
+
+	echo -n "Extracting apr $APR_VERSION... "
+	tar xjf "$APR_FILENAME" -C "$APACHE_DIRNAME/srclib/"
+	echo "done"
+	ln -snf "$APR_DIRNAME" "$APACHE_DIRNAME/srclib/apr"
+fi
+
+if [ ! -d "$APACHE_DIRNAME/srclib/$APR_UTIL_DIRNAME" ]; then
+	if [ ! -f "$APR_UTIL_FILENAME" ]; then
+		echo -n "Downloading $APR_UTIL_FILENAME... "
+		wget -q -O "$APR_UTIL_FILENAME" "$APR_UTIL_ARCHIVE"
+		if [ $? != "0" ]; then
+			echo "failed"
+			echo "Please restart this script to try another mirror."
+			echo "Failed url: $APR_UTIL_ARCHIVE"
+			rm -f "$APR_UTIL_FILENAME"
+			exit 1
+		fi
+		echo "done"
+	fi
+
+	echo -n "Checking archive MD5 sum... "
+	ORIGINAL_MD5=`curl -s "$APR_UTIL_MD5" | grep -m1 "$APR_UTIL_FILENAME" | "$SED" -r -e 's/.*([0-9a-f]{32}).*/\1/'`
+	if [ "$MD5" = md5sum ]; then
+		OUR_MD5=`md5sum "$APR_UTIL_FILENAME" | grep -m1 "$APR_UTIL_FILENAME" | sed -r -e 's/ .*$//'`
+	else
+		OUR_MD5=`md5 -q "$APR_UTIL_FILENAME"`
+	fi
+
+	if [ x"$ORIGINAL_MD5" != x"$OUR_MD5" ]; then
+		echo "failed"
+		echo "Original MD5: $ORIGINAL_MD5"
+		echo "Local MD5   : $OUR_MD5"
+		echo "Mirror      : $APR_UTIL_ARCHIVE"
+		echo "Please try restarting this script"
+		rm -f "$APR_UTIL_FILENAME"
+		exit 1
+	fi
+	echo "done"
+
+	echo -n "Extracting apr-util $APR_UTIL_VERSION... "
+	tar xjf "$APR_UTIL_FILENAME" -C "$APACHE_DIRNAME/srclib/"
+	echo "done"
+	ln -snf "$APR_UTIL_DIRNAME" "$APACHE_DIRNAME/srclib/apr-util"
+fi
+
 
 include(detect_mysql.m4)dnl
 
