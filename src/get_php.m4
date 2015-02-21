@@ -270,6 +270,7 @@ for foo in $PHP_PECL; do
 				# Uninstall: rm -fr /usr/lib/libv8.so /usr/lib/libv8_libplatform.a /usr/include/v8* /usr/include/libplatform
 
 				echo -n "ok]"
+				cd ..
 			fi
 		fi
 		echo -n "[git] "
