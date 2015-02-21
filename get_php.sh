@@ -318,7 +318,10 @@ for foo in $PHP_PECL; do
 			echo -n "ok]"
 			PECL_CONFIGURE+=("--enable-git2-debug")
 		fi
-		if [ "$foo" = "v8js" ]; then
+		if [ "$NAME" = "memcached" ]; then
+			PECL_CONFIGURE+=("--disable-memcached-sasl")
+		fi
+		if [ "$NAME" = "v8js" ]; then
 			if [ ! -f /usr/lib/libv8.so ]; then
 				# get v8 from git (repo is huge, get ready for >100MB dl)
 				echo -n "[v8:pull.."
