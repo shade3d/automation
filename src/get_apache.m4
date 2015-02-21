@@ -48,7 +48,7 @@ fi
 
 if [ ! -f "$APACHE_FILENAME" ]; then
 	echo -n "Downloading $APACHE_FILENAME... "
-	wget -q -O "$APACHE_FILENAME" "$APACHE_ARCHIVE"
+	wget --timeout=300 -q -O "$APACHE_FILENAME" "$APACHE_ARCHIVE"
 	if [ $? != "0" ]; then
 		echo "failed"
 		echo "Please restart this script to try another mirror."
@@ -109,7 +109,7 @@ fi
 if [ ! -d "$APACHE_DIRNAME/srclib/$APR_DIRNAME" ]; then
 	if [ ! -f "$APR_FILENAME" ]; then
 		echo -n "Downloading $APR_FILENAME... "
-		wget -q -O "$APR_FILENAME" "$APR_ARCHIVE"
+		wget --timeout=300 -q -O "$APR_FILENAME" "$APR_ARCHIVE"
 		if [ $? != "0" ]; then
 			echo "failed"
 			echo "Please restart this script to try another mirror."
@@ -148,7 +148,7 @@ fi
 if [ ! -d "$APACHE_DIRNAME/srclib/$APR_UTIL_DIRNAME" ]; then
 	if [ ! -f "$APR_UTIL_FILENAME" ]; then
 		echo -n "Downloading $APR_UTIL_FILENAME... "
-		wget -q -O "$APR_UTIL_FILENAME" "$APR_UTIL_ARCHIVE"
+		wget --timeout=300 -q -O "$APR_UTIL_FILENAME" "$APR_UTIL_ARCHIVE"
 		if [ $? != "0" ]; then
 			echo "failed"
 			echo "Please restart this script to try another mirror."

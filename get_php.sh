@@ -139,7 +139,7 @@ PHP_DIR="php-web-$PHP_VERSION"
 if [ ! -f "$PHP_FILE" ]; then
 	echo -n "Downloading PHP $PHP_VERSION..."
 	# from/this/mirror allows autodetection to give us closest mirror
-	wget -q -O "$PHP_FILE" "http://php.net/get/$PHP_FILE/from/this/mirror"
+	wget --timeout=300 -q -O "$PHP_FILE" "http://php.net/get/$PHP_FILE/from/this/mirror"
 
 	if [ $? != "0" ]; then
 		echo "Could not download $PHP_FILE"
@@ -148,27 +148,6 @@ if [ ! -f "$PHP_FILE" ]; then
 	fi
 	echo "done"
 fi
-# download suhosin
-#if [ ! -f "$PHP_SUHOSIN_FILE" ]; then
-#	echo -n "Downloading PHP SUHOSIN for PHP$PHP_VERSION..."
-#	wget -q -O "$PHP_SUHOSIN_FILE" "http://download.suhosin.org/$PHP_SUHOSIN_FILE"
-#	if [ $? != "0" ]; then
-#		echo "Could not download $PHP_SUHOSIN_FILE"
-#		exit 1
-#	fi
-#	echo "done"
-#fi
-
-# download mail patch
-#if [ ! -f "$PHP_MAIL_PATCH_FILE" ]; then
-#	echo -n "Downloading $PHP_MAIL_PATCH_FILE ..."
-#	wget -q -O "$PHP_MAIL_PATCH_FILE" "https://raw.githubusercontent.com/MagicalTux/automation/master/$PHP_MAIL_PATCH_FILE"
-#	if [ $? != "0" ]; then
-#		echo "Could not download $PHP_MAIL_PATCH_FILE"
-#		exit 1
-#	fi
-#	echo "done"
-#fi
 
 IS_CLEAN=no
 if [ ! -d "$PHP_DIR" ]; then
