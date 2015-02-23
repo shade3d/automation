@@ -104,7 +104,10 @@ if [ -f php_branch.txt ]; then
 	PHP_BRANCH=`cat php_branch.txt`
 fi
 
-PHP_PECL="imagick uuid memcached/stable svn mailparse mongo git://github.com/libgit2/php-git.git stomp yaml proctitle git://github.com/preillyme/v8js.git"
+if [ x$"PHP_PECL" = x ]; then
+	# default set of PECL modules
+	PHP_PECL="imagick uuid memcached/stable svn mailparse mongo git://github.com/libgit2/php-git.git stomp yaml proctitle git://github.com/preillyme/v8js.git"
+fi
 # PECL DEPENCIES
 # imagick : libmagick6-dev
 
