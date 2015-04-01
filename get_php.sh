@@ -10,7 +10,7 @@ if [ `echo -n | grep -c -- -n` -gt 0 ]; then
 fi
 
 OPTS="$@"
-SCRIPT_VERSION="1.65"
+SCRIPT_VERSION="1.66"
 
 SCRIPT_FORCE_REINSTALL=0
 SCRIPT_FORCE_UPDATE=0
@@ -353,7 +353,7 @@ for foo in $PHP_PECL; do
 	fi
 
 	echo -n "$foo"
-	curl -s "http://pecl.php.net/get/$foo" | tar xzf /dev/stdin >/dev/null 2>&1
+	curl -s "https://pecl.php.net/get/$foo" | tar xzf /dev/stdin >/dev/null 2>&1
 	foo=`echo "$foo" | cut -d/ -f1`
 	dr=`find . -name "$foo*" -type d | head -n1`
 	if [ x"$dr" = x ]; then

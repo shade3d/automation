@@ -1,6 +1,6 @@
 changequote([","])dnl
 define(["M4_TARGET"],["get_php.sh"])dnl
-define(["M4_VERSION"],["1.65"])dnl
+define(["M4_VERSION"],["1.66"])dnl
 dnl rpm -i http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
 define(["M4_YUM_PKG"],["make gcc gcc-g++ zlib-devel openssl-devel libxml2-devel bzip2-devel libcurl-devel libjpeg-devel libpng-devel freetype-devel gmp-devel libc-client-devel libicu-devel openldap-devel libmcrypt-devel libtidy-devel libxslt-devel git ImageMagick-devel libmemcached-devel libyaml-devel libuuid-devel libmongodb-devel"])dnl
 include(bash.m4)dnl
@@ -265,7 +265,7 @@ for foo in $PHP_PECL; do
 	fi
 
 	echo -n "$foo"
-	curl -s "http://pecl.php.net/get/$foo" | tar xzf /dev/stdin >/dev/null 2>&1
+	curl -s "https://pecl.php.net/get/$foo" | tar xzf /dev/stdin >/dev/null 2>&1
 	foo=`echo "$foo" | cut -d/ -f1`
 	dr=`find . -name "$foo*" -type d | head -n1`
 	if [ x"$dr" = x ]; then
