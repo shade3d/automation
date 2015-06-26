@@ -1,6 +1,6 @@
 changequote([","])dnl
 define(["M4_TARGET"],["get_php.sh"])dnl
-define(["M4_VERSION"],["1.67"])dnl
+define(["M4_VERSION"],["1.68"])dnl
 dnl rpm -i http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
 define(["M4_YUM_PKG"],["make gcc gcc-g++ zlib-devel openssl-devel libxml2-devel bzip2-devel libcurl-devel libjpeg-devel libpng-devel freetype-devel gmp-devel libc-client-devel libicu-devel openldap-devel libmcrypt-devel libtidy-devel libxslt-devel git ImageMagick-devel libmemcached-devel libyaml-devel libuuid-devel libmongodb-devel"])dnl
 include(bash.m4)dnl
@@ -18,7 +18,7 @@ fi
 
 if [ x"$PHP_PECL" = x ]; then
 	# default set of PECL modules
-	PHP_PECL="imagick uuid memcached/stable mailparse git://github.com/libgit2/php-git.git stomp yaml proctitle git://github.com/preillyme/v8js.git"
+	PHP_PECL="imagick uuid memcached/stable mailparse git://github.com/MagicalTux/php-git.git stomp yaml proctitle git://github.com/preillyme/v8js.git"
 fi
 # PECL DEPENCIES
 # imagick : libmagick6-dev
@@ -200,7 +200,7 @@ for foo in $PHP_PECL; do
 				git submodule update -q
 				mkdir libgit2/build
 				cd libgit2/build
-				cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF -DBUILD_CLAR=OFF -DCMAKE_C_FLAGS=-fPIC .. >../../libgit2_cmake_init.log 2>&1
+				cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF -DBUILD_CLAR=OFF -DCMAKE_C_FLAGS=-fPIC -DUSE_SSH=ON .. >../../libgit2_cmake_init.log 2>&1
 				cmake --build . >../../libgit2_cmake_compile.log 2>&1
 				cd ../..
 			elif [ ! -f libgit2/build/libgit2.a ]; then
@@ -258,6 +258,10 @@ for foo in $PHP_PECL; do
 		echo -n "[git] "
 		"${PHP_PREFIX}/bin/phpize" >phpize.log 2>&1 || ( echo -n "[fail] " && continue )
 		./configure >configure.log 2>&1 "${PECL_CONFIGURE[@]}"
+		if [ "$NAME" = "php-git" ]; then
+			# special case, linking ssh2 in php-git is a pain, so we cheat our way out (-Wl required because if using -l libtool will move it)
+			sed -r -i 's/^(GIT2_SHARED_LIBADD = .*)$/\1 -Wl,-lssh2/' Makefile
+		fi
 		make -j"$MAKE_PROCESSES" >make.log 2>&1
 		cp modules/* "${PHP_PREFIX}/lib/php_mod"
 		cd ..
