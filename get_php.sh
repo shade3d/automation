@@ -300,7 +300,7 @@ for foo in $PHP_PECL; do
 			echo -n "ok]"
 			PECL_CONFIGURE+=("--enable-git2-debug")
 		fi
-		if [ "$NAME" = "memcached" ]; then
+		if [ "$NAME" = "memcached/stable" ]; then
 			PECL_CONFIGURE+=("--disable-memcached-sasl")
 		fi
 		if [ "$NAME" = "v8js" ]; then
