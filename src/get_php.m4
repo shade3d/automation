@@ -212,9 +212,6 @@ for foo in $PHP_PECL; do
 			echo -n "ok]"
 			PECL_CONFIGURE+=("--enable-git2-debug")
 		fi
-		if [ "$NAME" = "memcached/stable" ]; then
-			PECL_CONFIGURE+=("--disable-memcached-sasl")
-		fi
 		if [ "$NAME" = "v8js" ]; then
 			if [ ! -f /usr/lib/libv8.so ]; then
 				# get v8 from git (repo is huge, get ready for >100MB dl)
@@ -266,6 +263,9 @@ for foo in $PHP_PECL; do
 		cp modules/* "${PHP_PREFIX}/lib/php_mod"
 		cd ..
 		continue
+	fi
+	if [ "$NAME" = "memcached/stable" ]; then
+		PECL_CONFIGURE+=("--disable-memcached-sasl")
 	fi
 
 	echo -n "$foo"
