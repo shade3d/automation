@@ -352,7 +352,7 @@ for foo in $PHP_PECL; do
 		cd ..
 		continue
 	fi
-	if [ "$NAME" = "memcached/stable" ]; then
+	if [ "$foo" = "memcached/stable" ]; then
 		PECL_CONFIGURE+=("--disable-memcached-sasl")
 	fi
 
