@@ -10,7 +10,7 @@ if [ `echo -n | grep -c -- -n` -gt 0 ]; then
 fi
 
 OPTS="$@"
-SCRIPT_VERSION="1.69"
+SCRIPT_VERSION="1.70"
 
 SCRIPT_FORCE_REINSTALL=0
 SCRIPT_FORCE_UPDATE=0
@@ -106,7 +106,7 @@ fi
 
 if [ x"$PHP_PECL" = x ]; then
 	# default set of PECL modules
-	PHP_PECL="imagick uuid memcached/stable mailparse git://github.com/MagicalTux/php-git2.git stomp yaml proctitle git://github.com/preillyme/v8js.git"
+	PHP_PECL="imagick uuid mailparse git://github.com/MagicalTux/php-git2.git stomp yaml proctitle git://github.com/preillyme/v8js.git"
 fi
 # PECL DEPENCIES
 # imagick : libmagick6-dev
