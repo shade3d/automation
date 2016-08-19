@@ -10,7 +10,7 @@ if [ `echo -n | grep -c -- -n` -gt 0 ]; then
 fi
 
 OPTS="$@"
-SCRIPT_VERSION="1.68"
+SCRIPT_VERSION="1.69"
 
 SCRIPT_FORCE_REINSTALL=0
 SCRIPT_FORCE_UPDATE=0
@@ -97,7 +97,7 @@ case `uname` in
 		;;
 esac
 
-PHP_BRANCH="5"
+PHP_BRANCH="7"
 
 # allow override of php branch easily (TODO: make this a ini file one day)
 if [ -f php_branch.txt ]; then
@@ -106,7 +106,7 @@ fi
 
 if [ x"$PHP_PECL" = x ]; then
 	# default set of PECL modules
-	PHP_PECL="imagick uuid memcached/stable mailparse git://github.com/MagicalTux/php-git.git stomp yaml proctitle git://github.com/preillyme/v8js.git"
+	PHP_PECL="imagick uuid memcached/stable mailparse git://github.com/MagicalTux/php-git2.git stomp yaml proctitle git://github.com/preillyme/v8js.git"
 fi
 # PECL DEPENCIES
 # imagick : libmagick6-dev
@@ -300,6 +300,13 @@ for foo in $PHP_PECL; do
 			echo -n "ok]"
 			PECL_CONFIGURE+=("--enable-git2-debug")
 		fi
+		if [ "$NAME" = "php-git2" ]; then
+			if [ ! -f libgit2/build/libgit2.a ]; then
+				echo -n "[libgit2:"
+				./libgit2_build.sh >libgit2_build.log 2>&1
+				echo -n "ok]"
+			fi
+		fi
 		if [ "$NAME" = "v8js" ]; then
 			if [ ! -f /usr/lib/libv8.so ]; then
 				# get v8 from git (repo is huge, get ready for >100MB dl)
@@ -313,7 +320,7 @@ for foo in $PHP_PECL; do
 				fi
 				# version 3.30.00 is known to work with this ext
 				if [ ! -d depot_tools ]; then
-					svn checkout -q http://src.chromium.org/svn/trunk/tools/depot_tools
+					svn checkout -q https://src.chromium.org/svn/trunk/tools/depot_tools
 					# small handler for python to help point to python2.7
 					echo '#!/bin/sh' >depot_tools/python
 					echo 'if [ -x /usr/bin/python2.7 ]; then' >>depot_tools/python

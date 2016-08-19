@@ -1,6 +1,6 @@
 changequote([","])dnl
 define(["M4_TARGET"],["get_php.sh"])dnl
-define(["M4_VERSION"],["1.68"])dnl
+define(["M4_VERSION"],["1.69"])dnl
 dnl rpm -i http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
 define(["M4_YUM_PKG"],["make gcc gcc-g++ zlib-devel openssl-devel libxml2-devel bzip2-devel libcurl-devel libjpeg-devel libpng-devel freetype-devel gmp-devel libc-client-devel libicu-devel openldap-devel libmcrypt-devel libtidy-devel libxslt-devel git ImageMagick-devel libmemcached-devel libyaml-devel libuuid-devel libmongodb-devel"])dnl
 include(bash.m4)dnl
@@ -9,7 +9,7 @@ include(apache.m4)dnl
 include(php.m4)dnl
 include(os.m4)dnl
 
-PHP_BRANCH="5"
+PHP_BRANCH="7"
 
 # allow override of php branch easily (TODO: make this a ini file one day)
 if [ -f php_branch.txt ]; then
@@ -18,7 +18,7 @@ fi
 
 if [ x"$PHP_PECL" = x ]; then
 	# default set of PECL modules
-	PHP_PECL="imagick uuid memcached/stable mailparse git://github.com/MagicalTux/php-git.git stomp yaml proctitle git://github.com/preillyme/v8js.git"
+	PHP_PECL="imagick uuid memcached/stable mailparse git://github.com/MagicalTux/php-git2.git stomp yaml proctitle git://github.com/preillyme/v8js.git"
 fi
 # PECL DEPENCIES
 # imagick : libmagick6-dev
@@ -212,6 +212,13 @@ for foo in $PHP_PECL; do
 			echo -n "ok]"
 			PECL_CONFIGURE+=("--enable-git2-debug")
 		fi
+		if [ "$NAME" = "php-git2" ]; then
+			if [ ! -f libgit2/build/libgit2.a ]; then
+				echo -n "[libgit2:"
+				./libgit2_build.sh >libgit2_build.log 2>&1
+				echo -n "ok]"
+			fi
+		fi
 		if [ "$NAME" = "v8js" ]; then
 			if [ ! -f /usr/lib/libv8.so ]; then
 				# get v8 from git (repo is huge, get ready for >100MB dl)
@@ -225,7 +232,7 @@ for foo in $PHP_PECL; do
 				fi
 				# version 3.30.00 is known to work with this ext
 				if [ ! -d depot_tools ]; then
-					svn checkout -q http://src.chromium.org/svn/trunk/tools/depot_tools
+					svn checkout -q https://src.chromium.org/svn/trunk/tools/depot_tools
 					# small handler for python to help point to python2.7
 					echo '#!/bin/sh' >depot_tools/python
 					echo 'if [ -x /usr/bin/python2.7 ]; then' >>depot_tools/python
