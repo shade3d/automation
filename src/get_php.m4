@@ -222,12 +222,13 @@ for foo in $PHP_PECL; do
 		if [ "$NAME" = "v8js" ]; then
 			if [ ! -f /usr/lib/libv8.so ]; then
 				# get v8 from git (repo is huge, get ready for >100MB dl)
+				V8_GIT_URL="https://github.com/v8/v8.git" # or https://chromium.googlesource.com/v8/v8
 				echo -n "[v8:pull.."
 					if [ -d v8 ]; then
 					cd v8
 					git pull -n -q
 				else
-					git clone -q https://github.com/v8/v8.git
+					git clone -q "$V8_GIT_URL"
 					cd v8
 				fi
 				# version 3.30.00 is known to work with this ext
@@ -242,10 +243,17 @@ for foo in $PHP_PECL; do
 					echo 'fi' >>depot_tools/python
 					chmod +x depot_tools/python
 				fi
+				PATH_DEPOT_TOOLS="`pwd`/depot_tools:$PATH"
+
 				echo -n "dep.."
-				PATH="`pwd`/depot_tools:$PATH" make dependencies >../v8_dep.log 2>&1
+				# need to be one folder back for gclient config/sync
+				cd ..
+				PATH="$PATH_DEPOT_TOOLS" gclient config "$V8_GIT_URL" >v8_gclient_config.log 2>&1
+				PATH="$PATH_DEPOT_TOOLS" gclient sync >v8_gclient_sync.log 2>&1
+				cd v8
+
 				echo -n "build.."
-				PATH="`pwd`/depot_tools:$PATH" make native GYPFLAGS="-Duse_system_icu=1 -Dcomponent=shared_library -Dv8_enable_backtrace=1 -Darm_fpu=default -Darm_float_abi=default" -j"$MAKE_PROCESSES" >../v8_make.log 2>&1
+				PATH="$PATH_DEPOT_TOOLS" make native GYPFLAGS="-Duse_system_icu=1 -Dcomponent=shared_library -Dv8_enable_backtrace=1 -Darm_fpu=default -Darm_float_abi=default" -j"$MAKE_PROCESSES" >../v8_make.log 2>&1
 
 				echo -n "install.."
 				cp out/native/lib.target/libv8.so /usr/lib/libv8.so
