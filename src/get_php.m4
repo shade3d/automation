@@ -233,7 +233,7 @@ for foo in $PHP_PECL; do
 				fi
 				# version 3.30.00 is known to work with this ext
 				if [ ! -d depot_tools ]; then
-					svn checkout -q https://src.chromium.org/svn/trunk/tools/depot_tools
+					git clone -q https://chromium.googlesource.com/chromium/tools/depot_tools.git
 					# small handler for python to help point to python2.7
 					echo '#!/bin/sh' >depot_tools/python
 					echo 'if [ -x /usr/bin/python2.7 ]; then' >>depot_tools/python
