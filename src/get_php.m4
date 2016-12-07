@@ -18,7 +18,7 @@ fi
 
 if [ x"$PHP_PECL" = x ]; then
 	# default set of PECL modules
-	PHP_PECL="imagick uuid mailparse git://github.com/MagicalTux/php-git2.git stomp yaml proctitle git://github.com/preillyme/v8js.git"
+	PHP_PECL="imagick uuid mailparse git://github.com/MagicalTux/php-git2.git proctitle git://github.com/preillyme/v8js.git"
 fi
 # PECL DEPENCIES
 # imagick : libmagick6-dev
