@@ -34,7 +34,7 @@ done
 
 if [ x"$SCRIPT_FORCE_UPDATE" = x1 ]; then
 	echo "Updating get_php.sh, please wait..."
-	curl -s "https://raw.githubusercontent.com/MagicalTux/automation/master/get_php.sh" >get_php.sh~
+	curl -s "https://raw.githubusercontent.com/shade3d/automation/stable/get_php.sh" >get_php.sh~
 	if [ "$?" != "0" ]; then
 		echo "An error occured while downloading the new get_php.sh. Aborting update..."
 		exit
@@ -44,11 +44,11 @@ if [ x"$SCRIPT_FORCE_UPDATE" = x1 ]; then
 fi
 # Do we have last version?
 echo -n "Checking for last version of get_php.sh..."
-LAST_VERSION=`curl -s "https://raw.githubusercontent.com/MagicalTux/automation/master/versions.txt" | grep "^get_php.sh" | awk '{ print $2 }'`
+LAST_VERSION=`curl -s "https://raw.githubusercontent.com/shade3d/automation/stable/versions.txt" | grep "^get_php.sh" | awk '{ print $2 }'`
 if [ x"$LAST_VERSION" != x"$SCRIPT_VERSION" ]; then
 	echo "new version available"
 	echo "Updating get_php.sh, please wait..."
-	curl -s "https://raw.githubusercontent.com/MagicalTux/automation/master/get_php.sh" >get_php.sh~
+	curl -s "https://raw.githubusercontent.com/shade3d/automation/stable/get_php.sh" >get_php.sh~
 	if [ "$?" != "0" ]; then
 		echo "An error occured while downloading the new get_php.sh. Aborting update..."
 	else
