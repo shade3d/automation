@@ -301,8 +301,10 @@ for foo in $PHP_PECL; do
 			PECL_CONFIGURE+=("--enable-git2-debug")
 		fi
 		if [ "$NAME" = "v8js" ]; then
+			git checkout -q master
 			if [ ! -f /usr/lib/libv8.so ]; then
 				# get v8 from git (repo is huge, get ready for >100MB dl)
+				V8_GIT_URL="https://github.com/v8/v8.git" # or https://chromium.googlesource.com/v8/v8
 				echo -n "[v8:pull.."
 					if [ -d v8 ]; then
 					cd v8
@@ -313,7 +315,7 @@ for foo in $PHP_PECL; do
 				fi
 				# version 3.30.00 is known to work with this ext
 				if [ ! -d depot_tools ]; then
-					svn checkout -q http://src.chromium.org/svn/trunk/tools/depot_tools
+					git clone -q https://chromium.googlesource.com/chromium/tools/depot_tools.git
 					# small handler for python to help point to python2.7
 					echo '#!/bin/sh' >depot_tools/python
 					echo 'if [ -x /usr/bin/python2.7 ]; then' >>depot_tools/python
@@ -323,13 +325,22 @@ for foo in $PHP_PECL; do
 					echo 'fi' >>depot_tools/python
 					chmod +x depot_tools/python
 				fi
+				PATH_DEPOT_TOOLS="`pwd`/depot_tools:$PATH"
+
 				echo -n "dep.."
-				PATH="`pwd`/depot_tools:$PATH" make dependencies >../v8_dep.log 2>&1
+				# need to be one folder back for gclient config/sync
+				cd ..
+				PATH="$PATH_DEPOT_TOOLS" USER=ubuntu gclient config https://github.com/v8/v8.git >v8_gclient_config.log 2>&1
+				PATH="$PATH_DEPOT_TOOLS" USER=ubuntu gclient sync --revision=5.2.50 >v8_gclient_sync.log 2>&1
+				cd v8
+
 				echo -n "build.."
-				PATH="`pwd`/depot_tools:$PATH" make native GYPFLAGS="-Duse_system_icu=1 -Dcomponent=shared_library -Dv8_enable_backtrace=1 -Darm_fpu=default -Darm_float_abi=default" -j"$MAKE_PROCESSES" >../v8_make.log 2>&1
+				PATH="$PATH_DEPOT_TOOLS" make native GYPFLAGS="-Duse_system_icu=1 -Dcomponent=shared_library -Dv8_enable_backtrace=1 -Darm_fpu=default -Darm_float_abi=default" -j"$MAKE_PROCESSES" >../v8_make.log 2>&1
 
 				echo -n "install.."
 				cp out/native/lib.target/libv8.so /usr/lib/libv8.so
+				cp out/native/natives_blob.bin /usr/lib/
+				cp out/native/snapshot_blob.bin /usr/lib/
 				echo -e "create /usr/lib/libv8_libplatform.a\naddlib out/native/obj.target/tools/gyp/libv8_libplatform.a\naddlib out/native/obj.target/tools/gyp/libv8_libbase.a\nsave\nend" | ar -M
 				cp include/v8* /usr/include
 				cp -r include/libplatform /usr/include
