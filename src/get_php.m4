@@ -18,7 +18,7 @@ fi
 
 if [ x"$PHP_PECL" = x ]; then
 	# default set of PECL modules
-	PHP_PECL="imagick uuid memcached/stable mailparse git://github.com/MagicalTux/php-git.git stomp yaml proctitle git://github.com/preillyme/v8js.git"
+	PHP_PECL="imagick uuid memcached/2.2.0 mailparse/2.1.6 git://github.com/MagicalTux/php-git.git stomp/1.0.9 yaml/1.3.1 proctitle git://github.com/preillyme/v8js.git"
 fi
 # PECL DEPENCIES
 # imagick : libmagick6-dev
@@ -264,7 +264,7 @@ for foo in $PHP_PECL; do
 		cd ..
 		continue
 	fi
-	if [ "$foo" = "memcached/stable" ]; then
+	if [ "$foo" = "memcached/2.2.0" ]; then
 		PECL_CONFIGURE+=("--disable-memcached-sasl")
 	fi
 
