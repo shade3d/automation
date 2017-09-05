@@ -218,6 +218,7 @@ for foo in $PHP_PECL; do
 			if [ ! -f /usr/lib/libv8.so ]; then
 				# get v8 from git (repo is huge, get ready for >100MB dl)
 				V8_GIT_URL="https://github.com/v8/v8.git" # or https://chromium.googlesource.com/v8/v8
+				V8_VER="5.2.50"
 				echo -n "[v8:fetch.."
 				if [ -d v8 ]; then
 					cd v8
@@ -226,6 +227,7 @@ for foo in $PHP_PECL; do
 					git clone -q $V8_GIT_URL
 					cd v8
 				fi
+				git checkout -q $V8_VER
 				# version 3.30.00 is known to work with this ext
 				if [ ! -d depot_tools ]; then
 					git clone -q https://chromium.googlesource.com/chromium/tools/depot_tools.git
@@ -244,7 +246,7 @@ for foo in $PHP_PECL; do
 				# need to be one folder back for gclient config/sync
 				cd ..
 				PATH="$PATH_DEPOT_TOOLS" gclient config $V8_GIT_URL >v8_gclient_config.log 2>&1
-				PATH="$PATH_DEPOT_TOOLS" gclient sync --revision=5.2.50 >v8_gclient_sync.log 2>&1
+				PATH="$PATH_DEPOT_TOOLS" gclient sync --revision=$V8_VER >v8_gclient_sync.log 2>&1
 				cd v8
 
 				echo -n "build.."
