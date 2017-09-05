@@ -213,7 +213,8 @@ for foo in $PHP_PECL; do
 			PECL_CONFIGURE+=("--enable-git2-debug")
 		fi
 		if [ "$NAME" = "v8js" ]; then
-			git checkout -q 0.6.4
+			git checkout -q master
+			git reset -q --hard 0.6.4
 			if [ ! -f /usr/lib/libv8.so ]; then
 				# get v8 from git (repo is huge, get ready for >100MB dl)
 				V8_GIT_URL="https://github.com/v8/v8.git" # or https://chromium.googlesource.com/v8/v8
