@@ -213,16 +213,16 @@ for foo in $PHP_PECL; do
 			PECL_CONFIGURE+=("--enable-git2-debug")
 		fi
 		if [ "$NAME" = "v8js" ]; then
-			git checkout -q master
+			git checkout -q 0.6.4
 			if [ ! -f /usr/lib/libv8.so ]; then
 				# get v8 from git (repo is huge, get ready for >100MB dl)
 				V8_GIT_URL="https://github.com/v8/v8.git" # or https://chromium.googlesource.com/v8/v8
-				echo -n "[v8:pull.."
-					if [ -d v8 ]; then
+				echo -n "[v8:fetch.."
+				if [ -d v8 ]; then
 					cd v8
-					git pull -n -q
+					git fetch -n -q
 				else
-					git clone -q https://github.com/v8/v8.git
+					git clone -q $V8_GIT_URL
 					cd v8
 				fi
 				# version 3.30.00 is known to work with this ext
@@ -242,8 +242,8 @@ for foo in $PHP_PECL; do
 				echo -n "dep.."
 				# need to be one folder back for gclient config/sync
 				cd ..
-				PATH="$PATH_DEPOT_TOOLS" USER=ubuntu gclient config https://github.com/v8/v8.git >v8_gclient_config.log 2>&1
-				PATH="$PATH_DEPOT_TOOLS" USER=ubuntu gclient sync --revision=5.2.50 >v8_gclient_sync.log 2>&1
+				PATH="$PATH_DEPOT_TOOLS" gclient config $V8_GIT_URL >v8_gclient_config.log 2>&1
+				PATH="$PATH_DEPOT_TOOLS" gclient sync --revision=5.2.50 >v8_gclient_sync.log 2>&1
 				cd v8
 
 				echo -n "build.."
